@@ -1,0 +1,43 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+.tmp_pytest/
+.pytest_tmp/
+.pytest_tmp_run/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Runtime outputs
+output/
+*.log
+._app_stdout.log
+._app_stderr.log
+
+# Frontend / Node
+frontend/node_modules/
+frontend/dist/
+desktop/node_modules/
+desktop/dist/
+
+# Desktop packaging outputs
+desktop/release/
+desktop/python-runtime/
+
+# Temp / tooling local folders
+.manual_tmp/
+.claude/
+claude-code/
