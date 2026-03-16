@@ -57,10 +57,3 @@ pytest -q
 python tools/train_feedback_ranker.py
 ```
 
-## 发布到 GitHub 的建议
-
-1. 提交源码与配置模板（不要提交真实密钥）。
-2. 不提交运行产物与缓存（`output/`、`release/`、`node_modules/` 等）。
-3. 仅提交 `.env.example`，不要提交 `.env`。
-
----
