@@ -1,5 +1,7 @@
 <div align="center">
 
+**[English](README_EN.md)** | **中文**
+
 # 流剪工坊 · Stream Clipper
 
 **把几小时的直播录播变成几分钟的高光片段。**
