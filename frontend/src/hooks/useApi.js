@@ -48,6 +48,7 @@ function normalizeSourceUrl(sourceType, sourceUrl) {
       return withScheme;
     }
   }
+
   if (sourceType === 'web_vod' || sourceType === 'web_live') {
     const m = raw.match(/^https?:\/\/(?:www\.)?douyin\.com\/jingxuan\?.*?\bmodal_id=(\d{8,32})\b/i);
     if (m) return `https://www.douyin.com/video/${m[1]}`;
@@ -78,7 +79,7 @@ async function request(path, options = {}) {
       // keep plain-text detail
     }
     if (!detail || !String(detail).trim()) {
-      detail = res.statusText || '服务器内部错误';
+      detail = res.statusText || '服务端发生错误';
     }
     const err = new Error(`${res.status}: ${detail}`);
     err.status = res.status;
@@ -86,7 +87,6 @@ async function request(path, options = {}) {
     throw err;
   }
 
-  // 204 No Content or empty body
   if (!rawBody) {
     return {};
   }
@@ -99,7 +99,23 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  // Auth
+  getPublicSiteConfig: () => request('/public/site-config'),
+  listPublicProducts: () => request('/public/products'),
+  getPublicProduct: (productId) => request(`/public/products/${encodeURIComponent(productId)}`),
+  createPublicCheckout: (payload) =>
+    request('/public/orders/checkout', {
+      method: 'POST',
+      body: JSON.stringify(payload ?? {}),
+    }),
+  getPublicOrder: (orderId, token) =>
+    request(`/public/orders/${encodeURIComponent(orderId)}?token=${encodeURIComponent(token ?? '')}`),
+
+  submitLead: (payload) =>
+    request('/public/leads', {
+      method: 'POST',
+      body: JSON.stringify(payload ?? {}),
+    }),
+
   register: (email, password) =>
     request('/auth/register', {
       method: 'POST',
@@ -112,12 +128,11 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
 
-  // Jobs
   createJob: (sourceType, sourceUrl, options = {}) => {
     const normalizedUrl = normalizeSourceUrl(sourceType, sourceUrl);
     const topN = Number.parseInt(String(options.topN ?? 10), 10);
     const clipDuration = Number.parseFloat(String(options.clipDuration ?? 45));
-    const requestedDuration = Number.parseInt(String(options.duration ?? NaN), 10);
+    const requestedDuration = Number.parseInt(String(options.duration ?? Number.NaN), 10);
     const defaultDuration = sourceType === 'bili_live' || sourceType === 'web_live' ? 180 : 1800;
     const outputDir = typeof options.outputDir === 'string' ? options.outputDir.trim() : '';
     const rawS3Key = typeof options.rawS3Key === 'string' ? options.rawS3Key.trim() : '';
@@ -132,6 +147,7 @@ export const api = {
     const normalizedClipDuration = Number.isFinite(clipDuration)
       ? Math.min(3600, Math.max(5, clipDuration))
       : 45;
+
     const payload = {
       source_type: sourceType,
       source_url: normalizedUrl,
@@ -147,6 +163,7 @@ export const api = {
       adaptive_padding: options.adaptivePadding !== false,
       half_peak_ratio: Number.isFinite(halfPeakRatio) ? halfPeakRatio : 0.5,
     };
+
     if (outputDir) {
       payload.output_dir = outputDir;
     }
@@ -174,6 +191,7 @@ export const api = {
     if (boundaryProfilePath) {
       payload.boundary_profile_path = boundaryProfilePath;
     }
+
     return request('/jobs', {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -193,6 +211,7 @@ export const api = {
     const llmTimeoutSec = Number.parseFloat(String(options.llmTimeoutSec ?? 30));
     const boundaryProfilePath = typeof options.boundaryProfilePath === 'string' ? options.boundaryProfilePath.trim() : '';
     const halfPeakRatio = Number.parseFloat(String(options.halfPeakRatio ?? 0.5));
+
     formData.append('source_type', 'local');
     formData.append('top_n', String(Number.isFinite(topN) ? topN : 10));
     const normalizedClipDuration = Number.isFinite(clipDuration)
@@ -260,6 +279,7 @@ export const api = {
         } catch {
           // keep plain-text detail
         }
+
         const fallbackStatuses = new Set([404, 405, 415, 422, 501]);
         if (fallbackStatuses.has(xhr.status)) {
           (async () => {
@@ -276,6 +296,7 @@ export const api = {
           })();
           return;
         }
+
         reject(new Error(`创建本地任务失败: ${xhr.status}${detail ? `: ${detail}` : ''}`));
       }
     };
@@ -295,7 +316,6 @@ export const api = {
   pickOutputDirectory: (current = '') =>
     request(`/system/select-output-dir${current ? `?current=${encodeURIComponent(current)}` : ''}`),
 
-  // SSE progress stream
   streamProgress: (jobId, onMessage) => {
     const url = `${API_BASE}/jobs/${jobId}/stream`;
     const eventSource = new EventSource(url);
@@ -320,7 +340,6 @@ export const api = {
     return () => eventSource.close();
   },
 
-  // Clips
   listClips: (page = 1, sortBy = 'created_at') =>
     request(`/clips?page=${page}&sort_by=${sortBy}`),
 
@@ -346,13 +365,13 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ rating, note }),
     }),
+
   retrainFeedbackModel: (payload = {}) =>
     request('/feedback/retrain', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
 
-  // Upload
   getUploadUrl: () =>
     request('/upload/presign', { method: 'POST' }),
 

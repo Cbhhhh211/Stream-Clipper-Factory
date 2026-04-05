@@ -146,3 +146,62 @@ class ClipFeedbackResponse(BaseModel):
     status: str
     clip_id: str
     rating: Literal["good", "average", "bad"]
+
+
+# ---------------------------------------------------------------------------
+# Marketing / lead capture
+# ---------------------------------------------------------------------------
+
+class LeadCaptureRequest(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    email: EmailStr
+    role: str = Field(default="creator", max_length=64)
+    platform: str = Field(default="bilibili", max_length=64)
+    goal: str = Field(default="", max_length=300)
+    monthlyBudget: str = Field(default="", max_length=120)
+    notes: str = Field(default="", max_length=1000)
+    source: str = Field(default="marketing-site", max_length=64)
+
+
+class LeadCaptureResponse(BaseModel):
+    status: str
+    lead_id: str
+    created_at: datetime
+
+
+# ---------------------------------------------------------------------------
+# Public commerce / checkout
+# ---------------------------------------------------------------------------
+
+class PublicProductResponse(BaseModel):
+    product_id: str
+    name: str
+    description: str = ""
+    price_display: str = ""
+    featured: bool = False
+    checkout_enabled: bool = False
+
+
+class PublicCheckoutRequest(BaseModel):
+    product_id: str = Field(min_length=1, max_length=64)
+    email: EmailStr
+
+
+class PublicCheckoutResponse(BaseModel):
+    status: str
+    order_id: str
+    access_token: str
+    checkout_url: str
+    qr_svg_url: str
+
+
+class PublicOrderStatusResponse(BaseModel):
+    order_id: str
+    product_id: str
+    status: str
+    email: str
+    checkout_url: Optional[str] = None
+    download_url: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    paid_at: Optional[datetime] = None
