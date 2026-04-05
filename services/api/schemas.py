@@ -146,3 +146,24 @@ class ClipFeedbackResponse(BaseModel):
     status: str
     clip_id: str
     rating: Literal["good", "average", "bad"]
+
+
+# ---------------------------------------------------------------------------
+# Marketing / lead capture
+# ---------------------------------------------------------------------------
+
+class LeadCaptureRequest(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    email: EmailStr
+    role: str = Field(default="creator", max_length=64)
+    platform: str = Field(default="bilibili", max_length=64)
+    goal: str = Field(default="", max_length=300)
+    monthlyBudget: str = Field(default="", max_length=120)
+    notes: str = Field(default="", max_length=1000)
+    source: str = Field(default="marketing-site", max_length=64)
+
+
+class LeadCaptureResponse(BaseModel):
+    status: str
+    lead_id: str
+    created_at: datetime

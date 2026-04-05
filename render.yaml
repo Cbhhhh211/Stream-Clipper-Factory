@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: stream-clipper
+    runtime: docker
+    plan: starter
+    region: singapore
+    healthCheckPath: /health
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: API_MODE
+        value: lite
+      - key: OUTPUT_DIR
+        value: /var/data/output
+      - key: PUBLIC_LEADS_PATH
+        value: /var/data/output/_public/leads.jsonl
+      - key: PUBLIC_SITE_BRAND
+        value: Stream Clipper

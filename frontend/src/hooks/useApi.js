@@ -99,6 +99,14 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  getPublicSiteConfig: () => request('/public/site-config'),
+
+  submitLead: (payload) =>
+    request('/public/leads', {
+      method: 'POST',
+      body: JSON.stringify(payload ?? {}),
+    }),
+
   // Auth
   register: (email, password) =>
     request('/auth/register', {
