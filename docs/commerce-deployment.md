@@ -53,6 +53,15 @@ Optional marketing config:
    - `checkout.session.async_payment_failed`
    - `checkout.session.expired`
 
+### Current sandbox values
+
+These were created in the connected Stripe sandbox account and can be used for testing:
+
+- Creator product: `prod_UHH525BOuMkVdQ`
+- Creator price: `price_1TIiamDk9lZYBg7JM48Im3Jd` (`CNY 9.90`)
+- Studio product: `prod_UHH59pAvO8rkNw`
+- Studio price: `price_1TIiaoDk9lZYBg7Jkv2y5OgT` (`CNY 29.90`)
+
 ## File delivery setup
 
 1. Upload the final product zip to your object store.
