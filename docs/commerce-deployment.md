@@ -14,7 +14,26 @@ This project now supports a lightweight public checkout flow:
 - Payment: Stripe Checkout
 - File delivery: Cloudflare R2 or any S3-compatible object store
 
+## Lowest-cost MVP path
+
+If you want the lowest fixed cost first:
+
+1. Keep the app as a single Render web service
+2. Use Stripe Checkout for payment
+3. Upload the final desktop zip as a GitHub Release asset
+4. Put the public asset URL into:
+   - `PUBLIC_PRODUCT_CREATOR_DOWNLOAD_URL`
+   - `PUBLIC_PRODUCT_STUDIO_DOWNLOAD_URL`
+
+This works for the current product because GitHub Release assets support files up to 2 GiB. The tradeoff is that the file URL is public once shared, so this is best for an MVP and early testing, not long-term protected delivery.
+
+When you want stricter download control, switch those variables to R2/S3 object keys instead.
+
 ## Required environment variables
+
+For a copy-paste friendly starter set, see:
+
+- `docs/render-env-template.txt`
 
 Core checkout:
 
@@ -69,6 +88,18 @@ These were created in the connected Stripe sandbox account and can be used for t
    - `PUBLIC_PRODUCT_CREATOR_S3_KEY`
    - `PUBLIC_PRODUCT_STUDIO_S3_KEY`
 3. The API will generate a temporary signed download URL after payment succeeds.
+
+## GitHub Release asset option
+
+If you want the cheapest possible launch:
+
+1. Create a release in the GitHub repository
+2. Upload the final zip asset
+3. Copy the asset URL into:
+   - `PUBLIC_PRODUCT_CREATOR_DOWNLOAD_URL`
+   - `PUBLIC_PRODUCT_STUDIO_DOWNLOAD_URL`
+
+This avoids object storage costs entirely. Later, once sales are stable, migrate to R2 to get signed, time-limited download links.
 
 ## Render notes
 

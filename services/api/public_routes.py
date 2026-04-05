@@ -108,7 +108,7 @@ def _public_site_config() -> dict:
             _pricing_entry(
                 "PUBLIC_PRICE_CREATOR",
                 "创作者版",
-                "CNY 99",
+                "CNY 9.9",
                 "适合个人主播和兼职剪辑，先跑通直播回放到短视频的基础工作流。",
                 ["本地导入与自动切片", "候选片段复核与导出", "适合每天 1-2 场直播"],
                 "立即购买",
@@ -118,7 +118,7 @@ def _public_site_config() -> dict:
             _pricing_entry(
                 "PUBLIC_PRICE_STUDIO",
                 "工作室版",
-                "CNY 299",
+                "CNY 29.9",
                 "适合小团队和稳定接单的剪辑工作室，强调更可靠的交付节奏和支持。",
                 ["优先支持与交付说明", "更适合高频批量任务", "推荐作为对外售卖主推款"],
                 "购买工作室版",

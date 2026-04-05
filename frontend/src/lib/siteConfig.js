@@ -11,7 +11,7 @@ export const defaultSiteConfig = {
   pricing: [
     {
       name: '创作者版',
-      price: 'CNY 99',
+      price: 'CNY 9.9',
       description: '适合个人主播和兼职剪辑，先跑通从直播回放到短视频的基础工作流。',
       bullets: ['本地导入与自动切片', '候选片段复核与导出', '适合每天 1-2 场直播'],
       ctaLabel: '立即购买',
@@ -20,7 +20,7 @@ export const defaultSiteConfig = {
     },
     {
       name: '工作室版',
-      price: 'CNY 299',
+      price: 'CNY 29.9',
       description: '适合小团队和工作室，强调更稳定的交付效率与更清晰的售后支持。',
       bullets: ['推荐作为主推成交款', '更适合高频批量任务', '优先支持与交付说明'],
       ctaLabel: '购买工作室版',

@@ -1,0 +1,38 @@
+PORT=10000
+API_MODE=lite
+OUTPUT_DIR=/var/data/output
+PUBLIC_LEADS_PATH=/var/data/output/_public/leads.jsonl
+PUBLIC_SITE_BRAND=流剪工坊
+PUBLIC_CONTACT_EMAIL=founder@example.com
+PUBLIC_BOOKING_URL=mailto:founder@example.com?subject=%E6%B5%81%E5%89%AA%E5%B7%A5%E5%9D%8A%20Demo
+
+# Stripe sandbox values already created
+STRIPE_PRICE_ID_CREATOR=price_1TIiamDk9lZYBg7JM48Im3Jd
+STRIPE_PRICE_ID_STUDIO=price_1TIiaoDk9lZYBg7Jkv2y5OgT
+
+# Fill these from your Stripe dashboard / webhook setup
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+
+# Cheapest MVP path: use a GitHub Release asset URL
+PUBLIC_PRODUCT_CREATOR_NAME=流剪工坊 创作者版
+PUBLIC_PRODUCT_CREATOR_PRICE=CNY 9.9
+PUBLIC_PRODUCT_CREATOR_DESCRIPTION=适合个人主播和兼职剪辑，快速把直播回放变成可发布短视频素材。
+PUBLIC_PRODUCT_CREATOR_DOWNLOAD_URL=
+
+PUBLIC_PRODUCT_STUDIO_NAME=流剪工坊 工作室版
+PUBLIC_PRODUCT_STUDIO_PRICE=CNY 29.9
+PUBLIC_PRODUCT_STUDIO_DESCRIPTION=适合小团队和工作室，强调更稳定的交付效率、支持和售后说明。
+PUBLIC_PRODUCT_STUDIO_DOWNLOAD_URL=
+
+# Optional: switch to signed download links later
+PUBLIC_PRODUCT_CREATOR_S3_KEY=
+PUBLIC_PRODUCT_STUDIO_S3_KEY=
+PUBLIC_DOWNLOAD_LINK_TTL_SEC=900
+
+# Optional object storage config for R2 / S3
+S3_ENDPOINT_URL=
+S3_ACCESS_KEY=
+S3_SECRET_KEY=
+S3_BUCKET=
+S3_REGION=auto
