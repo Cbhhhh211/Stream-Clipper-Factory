@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
+from urllib.parse import quote
 
 
 STRIPE_API_VERSION = "2026-02-25.clover"
@@ -35,14 +36,25 @@ class PublicProduct:
     stripe_price_id: str = ""
     download_s3_key: str = ""
     download_url: str = ""
+    github_release_repo: str = ""
+    github_release_asset_name: str = ""
     featured: bool = False
 
     @property
     def checkout_enabled(self) -> bool:
-        return bool(self.stripe_price_id and (self.download_s3_key or self.download_url))
+        return bool(self.stripe_price_id and self.delivery_enabled)
+
+    @property
+    def delivery_enabled(self) -> bool:
+        return bool(
+            self.download_s3_key
+            or self.download_url
+            or (self.github_release_repo and self.github_release_asset_name)
+        )
 
 
 def public_products() -> dict[str, PublicProduct]:
+    shared_release_repo = env_value("PUBLIC_GITHUB_RELEASE_REPO")
     products = {
         "creator": PublicProduct(
             product_id="creator",
@@ -55,6 +67,8 @@ def public_products() -> dict[str, PublicProduct]:
             stripe_price_id=env_value("STRIPE_PRICE_ID_CREATOR"),
             download_s3_key=env_value("PUBLIC_PRODUCT_CREATOR_S3_KEY"),
             download_url=env_value("PUBLIC_PRODUCT_CREATOR_DOWNLOAD_URL"),
+            github_release_repo=env_value("PUBLIC_PRODUCT_CREATOR_GITHUB_RELEASE_REPO", shared_release_repo),
+            github_release_asset_name=env_value("PUBLIC_PRODUCT_CREATOR_RELEASE_ASSET_NAME"),
             featured=False,
         ),
         "studio": PublicProduct(
@@ -68,10 +82,22 @@ def public_products() -> dict[str, PublicProduct]:
             stripe_price_id=env_value("STRIPE_PRICE_ID_STUDIO"),
             download_s3_key=env_value("PUBLIC_PRODUCT_STUDIO_S3_KEY"),
             download_url=env_value("PUBLIC_PRODUCT_STUDIO_DOWNLOAD_URL"),
+            github_release_repo=env_value("PUBLIC_PRODUCT_STUDIO_GITHUB_RELEASE_REPO", shared_release_repo),
+            github_release_asset_name=env_value("PUBLIC_PRODUCT_STUDIO_RELEASE_ASSET_NAME"),
             featured=True,
         ),
     }
     return products
+
+
+def github_release_download_url(product: PublicProduct) -> str:
+    if not product.github_release_repo or not product.github_release_asset_name:
+        return ""
+    repo = product.github_release_repo.strip().strip("/")
+    asset_name = quote(product.github_release_asset_name.strip())
+    if not repo or not asset_name:
+        return ""
+    return f"https://github.com/{repo}/releases/latest/download/{asset_name}"
 
 
 def get_public_product(product_id: str) -> Optional[PublicProduct]:

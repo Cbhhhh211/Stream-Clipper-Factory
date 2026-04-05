@@ -21,9 +21,9 @@ If you want the lowest fixed cost first:
 1. Keep the app as a single Render web service
 2. Use Stripe Checkout for payment
 3. Upload the final desktop zip as a GitHub Release asset
-4. Put the public asset URL into:
-   - `PUBLIC_PRODUCT_CREATOR_DOWNLOAD_URL`
-   - `PUBLIC_PRODUCT_STUDIO_DOWNLOAD_URL`
+4. Either:
+   - put the public asset URL into `PUBLIC_PRODUCT_CREATOR_DOWNLOAD_URL` and `PUBLIC_PRODUCT_STUDIO_DOWNLOAD_URL`, or
+   - set `PUBLIC_GITHUB_RELEASE_REPO` plus `PUBLIC_PRODUCT_*_RELEASE_ASSET_NAME` and let the app resolve the latest release download URL for you
 
 This works for the current product because GitHub Release assets support files up to 2 GiB. The tradeoff is that the file URL is public once shared, so this is best for an MVP and early testing, not long-term protected delivery.
 
@@ -51,6 +51,9 @@ Digital delivery:
 - `S3_REGION`
 - `PUBLIC_PRODUCT_CREATOR_S3_KEY` or `PUBLIC_PRODUCT_CREATOR_DOWNLOAD_URL`
 - `PUBLIC_PRODUCT_STUDIO_S3_KEY` or `PUBLIC_PRODUCT_STUDIO_DOWNLOAD_URL`
+- `PUBLIC_GITHUB_RELEASE_REPO`
+- `PUBLIC_PRODUCT_CREATOR_RELEASE_ASSET_NAME`
+- `PUBLIC_PRODUCT_STUDIO_RELEASE_ASSET_NAME`
 
 Optional marketing config:
 
@@ -95,9 +98,11 @@ If you want the cheapest possible launch:
 
 1. Create a release in the GitHub repository
 2. Upload the final zip asset
-3. Copy the asset URL into:
-   - `PUBLIC_PRODUCT_CREATOR_DOWNLOAD_URL`
-   - `PUBLIC_PRODUCT_STUDIO_DOWNLOAD_URL`
+3. Choose one of these delivery options:
+   - copy the asset URL into `PUBLIC_PRODUCT_CREATOR_DOWNLOAD_URL` and `PUBLIC_PRODUCT_STUDIO_DOWNLOAD_URL`
+   - or set `PUBLIC_GITHUB_RELEASE_REPO` to your repo and set `PUBLIC_PRODUCT_*_RELEASE_ASSET_NAME` to the uploaded asset filename
+
+The second option is more convenient because each new GitHub release can reuse the same latest-release download pattern without editing the Render environment again.
 
 This avoids object storage costs entirely. Later, once sales are stable, migrate to R2 to get signed, time-limited download links.
 

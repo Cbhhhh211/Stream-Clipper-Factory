@@ -24,6 +24,7 @@ from .commerce import (
     creator_checkout_url,
     env_value,
     get_public_product,
+    github_release_download_url,
     load_order,
     mark_order_paid,
     mark_order_status,
@@ -271,6 +272,8 @@ async def download_public_order_asset(order_id: str, token: str = Query(default=
             target_url = storage.presign_download(product.download_s3_key, expires=expires)
         except Exception as exc:
             raise HTTPException(status_code=502, detail=f"Failed to prepare download: {exc}") from exc
+    else:
+        target_url = github_release_download_url(product)
 
     if not target_url:
         raise HTTPException(status_code=409, detail="Download is not configured for this product")
