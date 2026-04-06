@@ -22,7 +22,7 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
-from stream_clipper.config import PipelineConfig
+from stream_clipper.config import PipelineConfig, resolve_clip_window
 from stream_clipper.ingest.bili_live import BiliLiveIngest
 from stream_clipper.ingest.bili_vod import BiliVodIngest, _normalize_bili_url
 from stream_clipper.ingest.local import LocalIngest
@@ -257,9 +257,10 @@ def _cut_clip_h264(
     duration = max(0.1, float(clip_end) - float(clip_start))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     preset, crf, audio_bitrate = _clip_encode_options()
+    _ffmpeg = os.environ.get("FFMPEG_PATH", "ffmpeg")
     if fast_preview:
         fast_cmd = [
-            "ffmpeg",
+            _ffmpeg,
             "-y",
             "-ss",
             str(float(clip_start)),
@@ -280,7 +281,7 @@ def _cut_clip_h264(
             return "copy"
 
     encode_cmd = [
-        "ffmpeg",
+        _ffmpeg,
         "-y",
         "-ss",
         str(float(clip_start)),
@@ -412,15 +413,25 @@ def _job_response(job: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def _optional_float(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    if isinstance(value, str) and not value.strip():
+        return None
+    return float(value)
+
+
 def _build_config(options: Dict[str, Any]) -> PipelineConfig:
     top_n = max(1, min(50, int(options.get("top_n", 10))))
     model_size = str(options.get("model_size", os.getenv("WHISPER_MODEL", "tiny")))
     language = options.get("language", "zh")
-    clip_duration = float(options.get("clip_duration", 45.0))
-    clip_duration = max(5.0, min(3600.0, clip_duration))
-    # Keep previous asymmetric context ratio: 1/3 before, 2/3 after peak.
-    pad_before = clip_duration / 3.0
-    pad_after = clip_duration - pad_before
+    clip_window = resolve_clip_window(
+        options.get("clip_duration", 45.0),
+        adaptive_min_before=float(options.get("adaptive_min_before", 5.0)),
+        adaptive_max_before=_optional_float(options.get("adaptive_max_before")),
+        adaptive_min_after=float(options.get("adaptive_min_after", 8.0)),
+        adaptive_max_after=_optional_float(options.get("adaptive_max_after")),
+    )
     if language == "auto":
         language = None
     feedback_rank = parse_bool(options.get("feedback_rank", True), True)
@@ -448,15 +459,15 @@ def _build_config(options: Dict[str, Any]) -> PipelineConfig:
         language=language,
         top_n=top_n,
         candidate_multiplier=max(1, int(options.get("candidate_multiplier", 3))),
-        pad_before=pad_before,
-        pad_after=pad_after,
+        pad_before=clip_window["pad_before"],
+        pad_after=clip_window["pad_after"],
         threshold=options.get("threshold"),
         adaptive_padding=parse_bool(options.get("adaptive_padding", True), True),
         half_peak_ratio=float(options.get("half_peak_ratio", 0.5)),
-        adaptive_min_before=float(options.get("adaptive_min_before", 5.0)),
-        adaptive_max_before=float(options.get("adaptive_max_before", 45.0)),
-        adaptive_min_after=float(options.get("adaptive_min_after", 8.0)),
-        adaptive_max_after=float(options.get("adaptive_max_after", 60.0)),
+        adaptive_min_before=clip_window["adaptive_min_before"],
+        adaptive_max_before=clip_window["adaptive_max_before"],
+        adaptive_min_after=clip_window["adaptive_min_after"],
+        adaptive_max_after=clip_window["adaptive_max_after"],
         enable_feedback_ranking=feedback_rank,
         feedback_model_path=feedback_model_path,
         enable_llm_rerank=llm_rerank,
@@ -834,9 +845,11 @@ async def create_job(request: Request):
         options["adaptive_padding"] = str(form.get("adaptive_padding", "true")).strip()
         options["half_peak_ratio"] = form.get("half_peak_ratio", 0.5)
         options["adaptive_min_before"] = form.get("adaptive_min_before", 5.0)
-        options["adaptive_max_before"] = form.get("adaptive_max_before", 45.0)
+        if form.get("adaptive_max_before") is not None:
+            options["adaptive_max_before"] = form.get("adaptive_max_before")
         options["adaptive_min_after"] = form.get("adaptive_min_after", 8.0)
-        options["adaptive_max_after"] = form.get("adaptive_max_after", 60.0)
+        if form.get("adaptive_max_after") is not None:
+            options["adaptive_max_after"] = form.get("adaptive_max_after")
         uploaded_file = form.get("file")  # type: ignore[assignment]
     else:
         try:
@@ -871,9 +884,11 @@ async def create_job(request: Request):
         options["adaptive_padding"] = payload.get("adaptive_padding", True)
         options["half_peak_ratio"] = payload.get("half_peak_ratio", 0.5)
         options["adaptive_min_before"] = payload.get("adaptive_min_before", 5.0)
-        options["adaptive_max_before"] = payload.get("adaptive_max_before", 45.0)
+        if "adaptive_max_before" in payload:
+            options["adaptive_max_before"] = payload.get("adaptive_max_before")
         options["adaptive_min_after"] = payload.get("adaptive_min_after", 8.0)
-        options["adaptive_max_after"] = payload.get("adaptive_max_after", 60.0)
+        if "adaptive_max_after" in payload:
+            options["adaptive_max_after"] = payload.get("adaptive_max_after")
 
     if source_type not in {"local", "bili_vod", "bili_live", "web_vod", "web_live"}:
         raise HTTPException(400, "source_type 必须是以下之一：local、bili_vod、bili_live、web_vod、web_live")

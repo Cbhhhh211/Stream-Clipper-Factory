@@ -59,9 +59,9 @@ class JobCreate(BaseModel):
     adaptive_padding: bool = True
     half_peak_ratio: float = Field(default=0.5, ge=0.05, le=0.95)
     adaptive_min_before: float = Field(default=5.0, ge=0.0, le=120.0)
-    adaptive_max_before: float = Field(default=45.0, ge=0.0, le=240.0)
+    adaptive_max_before: Optional[float] = Field(default=None, ge=0.0, le=3600.0)
     adaptive_min_after: float = Field(default=8.0, ge=0.0, le=120.0)
-    adaptive_max_after: float = Field(default=60.0, ge=0.0, le=240.0)
+    adaptive_max_after: Optional[float] = Field(default=None, ge=0.0, le=3600.0)
 
 
 class JobStatusResponse(BaseModel):

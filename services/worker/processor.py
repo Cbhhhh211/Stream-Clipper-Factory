@@ -38,6 +38,7 @@ from services.db.session import get_sync_db
 from services.queue.job_queue import JobQueue
 from services.storage.s3 import S3Storage
 from stream_clipper.clipper.ffmpeg_clipper import cut_clips_indexed
+from stream_clipper.config import resolve_clip_window
 from stream_clipper.ml.feedback_ranker import (
     default_model_path,
     extract_features,
@@ -54,6 +55,14 @@ from stream_clipper.utils import parse_bool, safe_decode
 from .inference_client import InferenceClient
 
 logger = logging.getLogger(__name__)
+
+
+def _optional_float(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    if isinstance(value, str) and not value.strip():
+        return None
+    return float(value)
 
 
 class StageError(Exception):
@@ -691,10 +700,16 @@ class ClipWorker:
         duration = context["duration"]
         top_n = max(1, int(config.get("top_n", 10)))
         candidate_multiplier = max(1, int(config.get("candidate_multiplier", 3)))
-        clip_duration = float(config.get("clip_duration", 45.0))
-        clip_duration = max(5.0, min(3600.0, clip_duration))
-        pad_before = clip_duration / 3.0
-        pad_after = clip_duration - pad_before
+        clip_window = resolve_clip_window(
+            config.get("clip_duration", 45.0),
+            adaptive_min_before=float(config.get("adaptive_min_before", 5.0)),
+            adaptive_max_before=_optional_float(config.get("adaptive_max_before")),
+            adaptive_min_after=float(config.get("adaptive_min_after", 8.0)),
+            adaptive_max_after=_optional_float(config.get("adaptive_max_after")),
+        )
+        clip_duration = clip_window["clip_duration"]
+        pad_before = clip_window["pad_before"]
+        pad_after = clip_window["pad_after"]
         min_gap = max(5.0, min(3600.0, float(config.get("min_gap", max(clip_duration * 0.8, 10.0)))))
 
         # Score
@@ -715,10 +730,10 @@ class ClipWorker:
             video_duration=duration,
             adaptive_padding=self._is_enabled_flag(config.get("adaptive_padding", True), True),
             half_peak_ratio=float(config.get("half_peak_ratio", 0.5)),
-            adaptive_min_before=float(config.get("adaptive_min_before", 5.0)),
-            adaptive_max_before=float(config.get("adaptive_max_before", 45.0)),
-            adaptive_min_after=float(config.get("adaptive_min_after", 8.0)),
-            adaptive_max_after=float(config.get("adaptive_max_after", 60.0)),
+            adaptive_min_before=clip_window["adaptive_min_before"],
+            adaptive_max_before=clip_window["adaptive_max_before"],
+            adaptive_min_after=clip_window["adaptive_min_after"],
+            adaptive_max_after=clip_window["adaptive_max_after"],
         )
 
         virality_scores: List[Dict[str, float]] = []
@@ -1142,7 +1157,7 @@ class ClipWorker:
             tempfile.gettempdir(), f"audio_{uuid.uuid4().hex[:8]}.wav"
         )
         self._run_command([
-            "ffmpeg", "-y", "-i", video_path,
+            os.environ.get("FFMPEG_PATH", "ffmpeg"), "-y", "-i", video_path,
             "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1",
             audio_path,
         ], timeout_sec=self.FFMPEG_TIMEOUT_SEC, retries=1)
@@ -1150,7 +1165,7 @@ class ClipWorker:
 
     def _probe_duration(self, video_path: str) -> float:
         result = self._run_command([
-            "ffprobe", "-v", "quiet", "-show_entries", "format=duration",
+            os.environ.get("FFPROBE_PATH", "ffprobe"), "-v", "quiet", "-show_entries", "format=duration",
             "-of", "json", video_path,
         ], timeout_sec=self.FFPROBE_TIMEOUT_SEC, retries=1, text=True)
         data = json.loads(result.stdout)
@@ -1159,7 +1174,7 @@ class ClipWorker:
     def _generate_thumbnail(self, video_path: str, output_path: str) -> None:
         try:
             self._run_command([
-                "ffmpeg", "-y", "-i", video_path,
+                os.environ.get("FFMPEG_PATH", "ffmpeg"), "-y", "-i", video_path,
                 "-ss", "1", "-vframes", "1",
                 "-vf", "scale=320:-1",
                 output_path,

@@ -163,3 +163,59 @@ def test_cleanup_context_artifacts_removes_remaining_temp_files() -> None:
         assert not video_path.exists()
     finally:
         shutil.rmtree(tmp_path, ignore_errors=True)
+
+
+def test_stage_scoring_uses_requested_clip_duration_for_adaptive_caps(monkeypatch) -> None:
+    captured = {}
+
+    class FakeStorage:
+        def download_json(self, s3_key):
+            if s3_key == "comments.json":
+                return [{"time_offset": 10.0, "text": "666", "user_id": "u1", "dtype": 1}]
+            if s3_key == "segments.json":
+                return [{"start": 9.0, "end": 11.0, "text": "peak"}]
+            raise AssertionError(f"unexpected s3 key: {s3_key}")
+
+    class FakeInference:
+        def predict_virality(self, **_kwargs):
+            return []
+
+    def fake_compute_scores(_comments, _segments, _duration, audio_energy=None):
+        assert audio_energy is None
+        import numpy as np
+
+        return np.array([0.5, 1.5, 2.5]), np.array([0.1, 0.9, 0.2])
+
+    def fake_find_highlights(times, scores, comments, **kwargs):
+        captured["pad_before"] = kwargs["pad_before"]
+        captured["pad_after"] = kwargs["pad_after"]
+        captured["adaptive_max_before"] = kwargs["adaptive_max_before"]
+        captured["adaptive_max_after"] = kwargs["adaptive_max_after"]
+        return []
+
+    worker = processor.ClipWorker.__new__(processor.ClipWorker)
+    worker.storage = FakeStorage()
+    worker.inference = FakeInference()
+    monkeypatch.setattr("stream_clipper.resonance.scorer.compute_scores", fake_compute_scores)
+    monkeypatch.setattr("stream_clipper.resonance.peaks.find_highlights", fake_find_highlights)
+    monkeypatch.setattr(worker, "_load_feedback_ranker_model", lambda _config: None)
+    monkeypatch.setattr(worker, "_apply_llm_candidate_analysis", lambda *args, **kwargs: (False, False))
+
+    job = SimpleNamespace(id="job-1", user_id="user-1")
+    context = {
+        "duration": 300.0,
+        "danmaku_s3_key": "comments.json",
+        "segments_s3_key": "segments.json",
+    }
+    config = {
+        "clip_duration": 240,
+        "boundary_adaptation": False,
+    }
+
+    out = worker._stage_scoring(job, config, context, db=None)
+
+    assert captured["pad_before"] == 80.0
+    assert captured["pad_after"] == 160.0
+    assert captured["adaptive_max_before"] == 80.0
+    assert captured["adaptive_max_after"] == 160.0
+    assert out["highlights"] == []
