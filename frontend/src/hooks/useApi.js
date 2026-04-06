@@ -147,6 +147,8 @@ export const api = {
     const normalizedClipDuration = Number.isFinite(clipDuration)
       ? Math.min(3600, Math.max(5, clipDuration))
       : 45;
+    const adaptiveMaxBefore = normalizedClipDuration / 3;
+    const adaptiveMaxAfter = normalizedClipDuration - adaptiveMaxBefore;
 
     const payload = {
       source_type: sourceType,
@@ -162,6 +164,8 @@ export const api = {
       boundary_adaptation: options.boundaryAdaptation !== false,
       adaptive_padding: options.adaptivePadding !== false,
       half_peak_ratio: Number.isFinite(halfPeakRatio) ? halfPeakRatio : 0.5,
+      adaptive_max_before: adaptiveMaxBefore,
+      adaptive_max_after: adaptiveMaxAfter,
     };
 
     if (outputDir) {
@@ -217,6 +221,8 @@ export const api = {
     const normalizedClipDuration = Number.isFinite(clipDuration)
       ? Math.min(3600, Math.max(5, clipDuration))
       : 45;
+    const adaptiveMaxBefore = normalizedClipDuration / 3;
+    const adaptiveMaxAfter = normalizedClipDuration - adaptiveMaxBefore;
     formData.append('clip_duration', String(normalizedClipDuration));
     formData.append('candidate_multiplier', String(Number.isFinite(candidateMultiplier) ? candidateMultiplier : 3));
     formData.append('feedback_rank', String(options.feedbackRank !== false));
@@ -226,6 +232,8 @@ export const api = {
     formData.append('boundary_adaptation', String(options.boundaryAdaptation !== false));
     formData.append('adaptive_padding', String(options.adaptivePadding !== false));
     formData.append('half_peak_ratio', String(Number.isFinite(halfPeakRatio) ? halfPeakRatio : 0.5));
+    formData.append('adaptive_max_before', String(adaptiveMaxBefore));
+    formData.append('adaptive_max_after', String(adaptiveMaxAfter));
     formData.append('model_size', options.modelSize || 'tiny');
     formData.append('language', options.language || 'zh');
     if (outputDir) {

@@ -11,6 +11,47 @@ from dataclasses import dataclass
 from typing import Optional, Tuple
 
 
+def resolve_clip_window(
+    clip_duration: float,
+    *,
+    adaptive_min_before: float = 5.0,
+    adaptive_max_before: Optional[float] = None,
+    adaptive_min_after: float = 8.0,
+    adaptive_max_after: Optional[float] = None,
+) -> dict[str, float]:
+    """
+    Derive fixed padding plus adaptive bounds from the requested clip duration.
+
+    When callers do not provide adaptive max bounds, we keep the historical
+    1/3-before, 2/3-after ratio so the requested clip duration remains the
+    effective target length even with adaptive padding enabled.
+    """
+    normalized_duration = max(5.0, min(3600.0, float(clip_duration)))
+    pad_before = normalized_duration / 3.0
+    pad_after = normalized_duration - pad_before
+
+    min_before = max(0.0, float(adaptive_min_before))
+    min_after = max(0.0, float(adaptive_min_after))
+
+    if adaptive_max_before is None:
+        adaptive_max_before = pad_before
+    if adaptive_max_after is None:
+        adaptive_max_after = pad_after
+
+    max_before = max(min_before, min(3600.0, float(adaptive_max_before)))
+    max_after = max(min_after, min(3600.0, float(adaptive_max_after)))
+
+    return {
+        "clip_duration": normalized_duration,
+        "pad_before": pad_before,
+        "pad_after": pad_after,
+        "adaptive_min_before": min_before,
+        "adaptive_max_before": max_before,
+        "adaptive_min_after": min_after,
+        "adaptive_max_after": max_after,
+    }
+
+
 @dataclass
 class PipelineConfig:
     # ASR
@@ -72,6 +113,10 @@ class PipelineConfig:
             raise ValueError("candidate_multiplier must be >= 1")
         if not 0.05 <= self.half_peak_ratio <= 0.95:
             raise ValueError("half_peak_ratio must be in [0.05, 0.95]")
+        if self.adaptive_max_before < self.adaptive_min_before:
+            raise ValueError("adaptive_max_before must be >= adaptive_min_before")
+        if self.adaptive_max_after < self.adaptive_min_after:
+            raise ValueError("adaptive_max_after must be >= adaptive_min_after")
         if self.llm_max_candidates < 1:
             raise ValueError("llm_max_candidates must be >= 1")
         if not 0.0 <= self.llm_score_weight <= 1.0:
