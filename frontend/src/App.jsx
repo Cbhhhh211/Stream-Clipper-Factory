@@ -1,39 +1,49 @@
-import { AppProvider, useAppStore } from './store/useAppStore';
-import ImportPanel from './components/ImportPanel';
-import ProcessingView from './components/ProcessingView';
-import ReviewLayout from './components/ReviewLayout';
-import ExportPanel from './components/ExportPanel';
-import Header from './components/Header';
+import { useEffect, useState } from 'react';
+import MarketingSite from './components/MarketingSite';
+import StudioApp from './components/StudioApp';
 
-function AppContent() {
-  const { state } = useAppStore();
+function resolvePathname() {
+  if (typeof window === 'undefined') return '/';
+  return window.location.pathname || '/';
+}
 
-  return (
-    <div className="app-shell bg-ocean-shell relative flex h-full w-full flex-col overflow-hidden">
-      <div className="app-backdrop" aria-hidden>
-        <div className="grid-layer" />
-        <div className="noise-layer" />
-      </div>
+function isDesktopShell() {
+  return typeof window !== 'undefined' && Boolean(window.streamClipperDesktop);
+}
 
-      <div className="relative z-10 flex h-full w-full flex-col">
-        <Header />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden px-3 pb-3 md:px-6 md:pb-6">
-          <section key={state.phase} className="app-stage min-h-full phase-enter">
-            {state.phase === 'import' && <ImportPanel />}
-            {state.phase === 'processing' && <ProcessingView />}
-            {state.phase === 'review' && <ReviewLayout />}
-            {state.phase === 'export' && <ExportPanel />}
-          </section>
-        </main>
-      </div>
-    </div>
-  );
+function shouldRenderStudio(pathname) {
+  if (isDesktopShell()) {
+    return true;
+  }
+  return pathname === '/studio' || pathname === '/app';
 }
 
 export default function App() {
-  return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
-  );
+  const [pathname, setPathname] = useState(resolvePathname);
+  const studioMode = shouldRenderStudio(pathname);
+
+  useEffect(() => {
+    const onPopState = () => setPathname(resolvePathname());
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  useEffect(() => {
+    const body = document.body;
+    const root = document.getElementById('root');
+    body.classList.toggle('marketing-mode', !studioMode);
+    body.classList.toggle('studio-mode', studioMode);
+    root?.classList.toggle('marketing-root', !studioMode);
+    root?.classList.toggle('studio-root', studioMode);
+    return () => {
+      body.classList.remove('marketing-mode', 'studio-mode');
+      root?.classList.remove('marketing-root', 'studio-root');
+    };
+  }, [studioMode]);
+
+  if (studioMode) {
+    return <StudioApp />;
+  }
+
+  return <MarketingSite />;
 }
