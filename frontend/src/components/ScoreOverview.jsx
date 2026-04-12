@@ -4,10 +4,10 @@ import { useAppStore } from '../store/useAppStore';
 import { api } from '../hooks/useApi';
 
 const SCORE_BANDS = [
-  { label: '75-100', min: 0.75, max: 1.01, color: 'rgba(210,161,99,0.85)' },
-  { label: '50-74', min: 0.5, max: 0.75, color: 'rgba(127,174,210,0.78)' },
-  { label: '25-49', min: 0.25, max: 0.5, color: 'rgba(127,174,210,0.45)' },
-  { label: '0-24', min: 0, max: 0.25, color: 'rgba(201,215,230,0.9)' },
+  { label: '75-100', min: 0.75, max: 1.01, color: 'var(--color-warm)' },
+  { label: '50-74', min: 0.5, max: 0.75, color: 'var(--color-accent)' },
+  { label: '25-49', min: 0.25, max: 0.5, color: 'rgba(124, 109, 238, 0.4)' },
+  { label: '0-24', min: 0, max: 0.25, color: 'var(--color-text-muted)' },
 ];
 
 export default function ScoreOverview({ totalClips, selectedCount, totalDuration, avgScore }) {
@@ -35,11 +35,11 @@ export default function ScoreOverview({ totalClips, selectedCount, totalDuration
     <div className="flex h-full flex-col justify-between">
       <div>
         <div className="mb-5">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-text-muted">分析</div>
-          <h3 className="mt-1 text-lg font-semibold text-text-primary">评分概览</h3>
+          <div className="signal-label">分析</div>
+          <h3 className="mt-1 text-base font-semibold text-text-primary">评分概览</h3>
         </div>
 
-        <div className="mb-6 grid grid-cols-2 gap-3">
+        <div className="mb-6 grid grid-cols-2 gap-2.5">
           <StatCard label="已保留片段" value={`${selectedCount}/${totalClips}`} />
           <StatCard label="平均分" value={`${avgScore}`} />
           <StatCard label="总时长" value={`${totalDuration}秒`} />
@@ -48,7 +48,7 @@ export default function ScoreOverview({ totalClips, selectedCount, totalDuration
 
         {highlights.length > 0 && (
           <div>
-            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-muted">分布</div>
+            <div className="mb-3 signal-label">分布</div>
             <div className="space-y-2.5">
               {SCORE_BANDS.map((band) => {
                 const count = highlights.filter((h) => h.score >= band.min && h.score < band.max).length;
@@ -56,8 +56,8 @@ export default function ScoreOverview({ totalClips, selectedCount, totalDuration
                 return (
                   <div key={band.label} className="flex items-center gap-3">
                     <span className="w-12 shrink-0 text-right text-[10px] font-mono text-text-muted">{band.label}</span>
-                    <div className="h-[7px] flex-1 overflow-hidden rounded-full bg-[#20364f]">
-                      <div className="h-full rounded-full" style={{ width: `${barW}%`, background: band.color }} />
+                    <div className="h-[6px] flex-1 overflow-hidden rounded-full bg-white/5">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${barW}%`, background: band.color }} />
                     </div>
                     <span className="w-4 shrink-0 text-[11px] font-mono text-text-secondary">{count}</span>
                   </div>
@@ -68,10 +68,10 @@ export default function ScoreOverview({ totalClips, selectedCount, totalDuration
         )}
       </div>
 
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 flex gap-2.5">
         <button
           onClick={() => dispatch({ type: 'SET_EXPORT_PLATFORM', payload: 'bilibili' })}
-          className="btn-warm flex-1 rounded-full px-5 py-3 text-sm"
+          className="btn-warm flex-1 rounded-xl px-5 py-3 text-sm"
         >
           <Download size={15} />
           导出
@@ -80,9 +80,9 @@ export default function ScoreOverview({ totalClips, selectedCount, totalDuration
           onClick={handleRetrain}
           disabled={retraining}
           title="重新训练反馈模型"
-          className="btn-secondary rounded-full px-5"
+          className="btn-secondary rounded-xl px-4"
         >
-          <BrainCircuit size={16} className={retraining ? 'animate-pulse' : ''} />
+          <BrainCircuit size={15} className={retraining ? 'animate-pulse' : ''} />
         </button>
       </div>
     </div>
@@ -91,9 +91,9 @@ export default function ScoreOverview({ totalClips, selectedCount, totalDuration
 
 function StatCard({ label, value }) {
   return (
-    <div className="rounded-[18px] border border-white/8 bg-[#12283e] px-4 py-3">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-muted">{label}</div>
-      <div className="mt-2 text-2xl font-extrabold tracking-[-0.04em] text-text-primary">{value}</div>
+    <div className="rounded-xl border border-[var(--color-border)] bg-panel-strong px-3.5 py-3">
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">{label}</div>
+      <div className="mt-1.5 text-xl font-extrabold tracking-tight text-text-primary">{value}</div>
     </div>
   );
 }

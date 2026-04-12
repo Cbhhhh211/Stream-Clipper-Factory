@@ -39,7 +39,6 @@ export default function HighlightTimeline() {
   }, [draftBounds]);
 
   useEffect(() => {
-    // Drop stale drafts when highlight list changes.
     setDraftBounds((prev) => {
       const ids = new Set(state.highlights.map((h) => h.id));
       const next = {};
@@ -226,10 +225,10 @@ export default function HighlightTimeline() {
 
   return (
     <div className="flex w-full flex-col">
-      <div className="mb-4 flex items-center justify-between gap-3 border-b border-white/8 pb-3">
+      <div className="mb-4 flex items-center justify-between gap-3 border-b border-[var(--color-border)] pb-3">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="panel-accent">
-            <span className="text-xs font-semibold tracking-[0.16em] uppercase text-text-primary">时间轴</span>
+            <span className="text-xs font-semibold text-text-primary">时间轴</span>
           </div>
           <button
             onClick={handleSplit}
@@ -250,38 +249,38 @@ export default function HighlightTimeline() {
           {savingClipId && <span className="text-xs text-warm animate-pulse">保存中...</span>}
         </div>
 
-        <div className="flex items-center gap-1 rounded-full border border-white/8 bg-[#1a2c41] px-2 py-1">
+        <div className="flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-panel-strong px-2 py-1">
           <button
             onClick={() => setZoom((z) => Math.max(0.5, z - 0.5))}
-            className="cursor-pointer rounded-full border-none p-1 text-text-muted transition-colors hover:bg-[#24384f] hover:text-text-primary"
+            className="cursor-pointer rounded p-1 text-text-muted transition-colors hover:bg-white/5 hover:text-text-primary"
           >
-            <ZoomOut size={14} />
+            <ZoomOut size={13} />
           </button>
           <span className="w-8 text-center text-xs font-mono text-text-secondary">{zoom}x</span>
           <button
             onClick={() => setZoom((z) => Math.min(10, z + 0.5))}
-            className="cursor-pointer rounded-full border-none p-1 text-text-muted transition-colors hover:bg-[#24384f] hover:text-text-primary"
+            className="cursor-pointer rounded p-1 text-text-muted transition-colors hover:bg-white/5 hover:text-text-primary"
           >
-            <ZoomIn size={14} />
+            <ZoomIn size={13} />
           </button>
         </div>
       </div>
 
-      <div ref={containerRef} className="scrollbar-hide relative h-[260px] overflow-x-auto overflow-y-hidden rounded-[20px] border border-white/8 bg-[#12283e]">
+      <div ref={containerRef} className="scrollbar-hide relative h-[260px] overflow-x-auto overflow-y-hidden rounded-xl border border-[var(--color-border)] bg-black/25">
         <div className="relative h-full" style={{ width: totalWidth }}>
-          <div className="absolute inset-0 border-b border-white/8">
+          <div className="absolute inset-0 border-b border-[var(--color-border)]">
             {Array.from({ length: Math.ceil(duration / timeStep(zoom)) }, (_, i) => {
               const t = i * timeStep(zoom);
               return (
                 <div key={i} className="absolute top-2 flex flex-col items-center" style={{ left: t * pxPerSecond }}>
-                  <div className="mb-1 h-2 w-px bg-white/12" />
+                  <div className="mb-1 h-2 w-px bg-white/8" />
                   <span className="select-none text-[10px] font-mono text-text-muted">{formatTime(t)}</span>
                 </div>
               );
             })}
           </div>
 
-          <div className="pointer-events-none absolute top-10 bottom-0 left-0 right-0 opacity-55">
+          <div className="pointer-events-none absolute top-10 bottom-0 left-0 right-0 opacity-40">
             {state.highlights.map((clip) => {
               const density = clip.danmakuCount / maxDanmaku;
               return (
@@ -294,7 +293,7 @@ export default function HighlightTimeline() {
                     className="w-full rounded-t-sm"
                     style={{
                       height: `${Math.max(10, density * 100)}%`,
-                      background: density > 0.6 ? 'var(--color-warm)' : 'rgba(127,174,210,0.28)',
+                      background: density > 0.6 ? 'var(--color-warm)' : 'rgba(124, 109, 238, 0.25)',
                     }}
                   />
                 </div>
@@ -314,8 +313,8 @@ export default function HighlightTimeline() {
                   key={`region-${clip.id}`}
                   className={`absolute top-2 bottom-2 transition-all cursor-pointer rounded-lg border group ${
                     isSelected
-                        ? 'z-20 border-warm/45 bg-warm/10'
-                        : 'border-white/8 bg-[#1a314a] hover:bg-[#233a56]'
+                        ? 'z-20 border-warm/30 bg-warm/8'
+                        : 'border-[var(--color-border)] bg-panel-strong/80 hover:bg-bg-hover'
                   }`}
                   style={{ left, width: Math.max(width, 24) }}
                   onClick={() => dispatch({ type: 'SELECT_CLIP', payload: clip.id })}
@@ -328,14 +327,14 @@ export default function HighlightTimeline() {
                     className="absolute left-0 top-0 bottom-0 w-3 cursor-col-resize z-30 flex items-center justify-center"
                     onMouseDown={(e) => handleMouseDown(e, clip.id, 'start')}
                   >
-                    <div className={`h-9 w-[3px] rounded-full transition-all ${isSelected ? 'bg-warm' : 'bg-white/30'}`} />
+                    <div className={`h-8 w-[2px] rounded-full transition-all ${isSelected ? 'bg-warm' : 'bg-white/20'}`} />
                   </div>
 
                   <div
                     className="absolute right-0 top-0 bottom-0 w-3 cursor-col-resize z-30 flex items-center justify-center"
                     onMouseDown={(e) => handleMouseDown(e, clip.id, 'end')}
                   >
-                    <div className={`h-9 w-[3px] rounded-full transition-all ${isSelected ? 'bg-warm' : 'bg-white/30'}`} />
+                    <div className={`h-8 w-[2px] rounded-full transition-all ${isSelected ? 'bg-warm' : 'bg-white/20'}`} />
                   </div>
                 </div>
               );

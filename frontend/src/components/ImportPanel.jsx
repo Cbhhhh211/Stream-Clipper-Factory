@@ -234,265 +234,223 @@ export default function ImportPanel() {
   };
 
   return (
-    <div className="min-h-full w-full overflow-y-auto p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-[1380px] flex-col gap-5">
-        <section className="surface-panel overflow-hidden px-5 py-5 md:px-8 md:py-7">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_320px] xl:items-center">
+    <div className="min-h-full w-full overflow-y-auto p-4 md:p-6">
+      <div className="mx-auto flex w-full max-w-[1380px] flex-col gap-4">
+
+        {/* Hero */}
+        <section className="surface-panel overflow-hidden px-6 py-6 md:px-10 md:py-8">
+          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_240px] xl:items-center">
             <div>
-              <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-muted">
-                新建项目
+              <div className="mb-3 flex items-center gap-2.5">
+                <div className="h-1.5 w-1.5 rounded-full bg-accent" />
+                <span className="signal-label">新建项目</span>
               </div>
-              <h1 className="max-w-2xl text-4xl font-extrabold tracking-[-0.05em] text-text-primary md:text-5xl">
-                从本地文件、在线视频或直播间开始。
+              <h1 className="signal-heading max-w-xl text-4xl md:text-5xl">
+                从文件、视频<br className="hidden md:block" />或直播
+                <span className="text-accent"> 开始剪辑</span>
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-text-secondary">
-                页面保持简洁：选择来源、设置必要参数，然后生成可直接复核的片段。
+              <p className="mt-4 max-w-lg text-sm leading-7 text-text-secondary">
+                选择输入来源，配置参数，一键生成可直接复核的高光片段。
               </p>
             </div>
-            <div className="rounded-[26px] border border-white/8 bg-[#12263c] p-5">
+            <div className="hidden xl:block">
               <ImportIllustration />
             </div>
           </div>
         </section>
 
+        {/* Input Panel */}
         <section className="surface-panel p-5 md:p-6">
-            <div className="mb-5 flex flex-wrap gap-2 rounded-full bg-[#0d1d2f] p-1">
-              {TABS.map((tab) => {
-                const Icon = tab.icon;
-                const active = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => {
-                      setActiveTab(tab.id);
-                      setError('');
-                    }}
-                    className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] transition-colors ${
-                      active
-                        ? 'bg-[#2b3949] text-text-primary shadow-sm'
-                        : 'text-text-muted hover:text-text-primary'
-                    }`}
-                  >
-                    <Icon size={14} />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
 
-            <div className="grid gap-5 xl:grid-cols-2 xl:items-start">
-              <div className="flex flex-col gap-5 xl:min-h-[520px]">
-                {activeTab === 'upload' ? (
-                  <div
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setDragOver(true);
-                    }}
-                    onDragLeave={() => setDragOver(false)}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`relative min-h-[520px] cursor-pointer rounded-[24px] border border-dashed p-8 transition-colors ${
-                      dragOver
-                        ? 'border-accent bg-accent/8'
-                        : file
-                          ? 'border-success/40 bg-[#eef8f3]'
-                          : 'border-white/10 bg-[#0b1c2d] hover:border-accent/55 hover:bg-[#11253a]'
-                    }`}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="video/*"
-                      className="hidden"
-                      onChange={(e) => handleFile(e.target.files[0])}
-                    />
-                    <div className="flex h-full flex-col items-center justify-center gap-4 py-10 text-center">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#1b2d43] shadow-sm">
-                        {file ? <Film size={24} className="text-success" /> : <Upload size={24} className="text-accent" />}
-                      </div>
-                      <div>
-                        <div className="text-lg font-semibold text-text-primary">
-                          {file ? file.name : '将视频拖拽到这里'}
-                        </div>
-                        <div className="mt-2 text-sm text-text-secondary">
-                          {file ? '已准备好处理，点击可替换文件。' : '或点击选择本地 MP4 / MKV / AVI 文件。'}
-                        </div>
-                      </div>
+          {/* Tab Bar */}
+          <div className="mb-6 flex gap-1 rounded-xl border border-[var(--color-border)] bg-black/30 p-1">
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => { setActiveTab(tab.id); setError(''); }}
+                  className={`tab-signal flex-1 ${active ? 'tab-signal-active' : ''}`}
+                >
+                  <Icon size={14} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
 
-                      {uploading && (
-                        <div className="w-full max-w-xs">
-                          <div className="h-2 overflow-hidden rounded-full bg-[#20364f]">
-                            <div
-                              className="h-full rounded-full bg-accent transition-all duration-300"
-                              style={{ width: `${uploadProgress * 100}%` }}
-                            />
-                          </div>
-                          <div className="mt-2 text-xs font-mono text-text-muted">
-                            上传中 {Math.round(uploadProgress * 100)}%
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="min-h-[520px] rounded-[24px] border border-white/8 bg-[#12263c] p-4">
-                    <div className={`rounded-[18px] border px-4 py-5 transition-colors ${urlFocused ? 'border-accent bg-[#142b43]' : 'border-white/10 bg-[#102338]'}`}>
-                      <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-muted">
-                        {activeTab === 'live' ? '直播来源' : '视频来源'}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="text"
-                          value={url}
-                          onFocus={() => setUrlFocused(true)}
-                          onBlur={() => setUrlFocused(false)}
-                          onChange={(e) => {
-                            setUrl(e.target.value);
-                            setError('');
-                          }}
-                          placeholder={activeTab === 'live'
-                            ? '粘贴直播链接（B站 / 抖音 / 油管 等）'
-                            : '粘贴视频链接（B站 / 油管 / 抖音 / 西瓜 / 微博 / 小红书）'}
-                          className="flex-1 bg-transparent text-base text-text-primary outline-none placeholder:text-text-muted"
-                        />
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1a3047]">
-                          {urlStatus === 'loading' && <Loader2 size={15} className="animate-spin text-text-muted" />}
-                          {urlStatus === 'valid' && <CheckCircle2 size={15} className="text-success" />}
-                          {urlStatus === 'invalid' && <AlertTriangle size={15} className="text-danger" />}
-                        </div>
-                      </div>
-                    </div>
+          <div className="grid gap-5 xl:grid-cols-2 xl:items-start">
 
-                    {urlPreview && (
-                      <div className="mt-4 rounded-[18px] border border-white/8 bg-[#14293f] p-4">
-                        <div className="text-sm font-semibold text-text-primary">{urlPreview.title}</div>
-                        <div className="mt-1 text-sm text-text-secondary">{urlPreview.subtitle}</div>
-                        {urlPreview.meta && <div className="mt-2 text-xs text-text-muted">{urlPreview.meta}</div>}
-                      </div>
-                    )}
-                  </div>
-                )}
+            {/* Left: Input area */}
+            <div className="flex flex-col gap-4 xl:min-h-[520px]">
+              {activeTab === 'upload' ? (
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="relative min-h-[520px] cursor-pointer rounded-2xl border-2 border-dashed p-6 transition-all duration-300"
+                  style={{
+                    background: file ? 'rgba(62, 196, 126, 0.03)' : dragOver ? 'rgba(124, 109, 238, 0.04)' : 'rgba(0, 0, 0, 0.2)',
+                    borderColor: file
+                      ? 'rgba(62, 196, 126, 0.3)'
+                      : dragOver
+                        ? 'rgba(124, 109, 238, 0.4)'
+                        : 'var(--color-border)',
+                  }}
+                >
+                  <input ref={fileInputRef} type="file" accept="video/*" className="hidden" onChange={(e) => handleFile(e.target.files[0])} />
 
-                {error && (
-                  <div className="rounded-[18px] border border-danger/25 bg-danger/6 px-4 py-3 text-sm text-danger">
-                    {error}
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-5">
-                <div className="rounded-[24px] border border-white/8 bg-[#12283e] p-5">
-                  <div className="section-eyebrow mb-5">参数</div>
-                  <div className={`grid gap-4 ${activeTab === 'live' ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
-                    <Field label="片段数" hint={PARAM_HINT}>
-                      <input
-                        type="number"
-                        min={1}
-                        max={50}
-                        value={topN}
-                        onChange={(e) => {
-                          setTopN(e.target.value);
-                          localStorage.setItem('top_n', e.target.value);
-                        }}
-                        className="bento-input font-mono"
-                      />
-                    </Field>
-
-                    <Field label="片段时长（秒）" hint={PARAM_HINT}>
-                      <input
-                        type="number"
-                        min={5}
-                        max={3600}
-                        value={clipDuration}
-                        onChange={(e) => {
-                          setClipDuration(e.target.value);
-                          localStorage.setItem('clip_duration', e.target.value);
-                        }}
-                        className="bento-input font-mono"
-                      />
-                    </Field>
-
-                    {activeTab === 'live' && (
-                      <Field label="录制时长（秒）">
-                        <input
-                          type="number"
-                          min={30}
-                          max={43200}
-                          value={liveDuration}
-                          onChange={(e) => {
-                            setLiveDuration(e.target.value);
-                            localStorage.setItem('live_duration', e.target.value);
-                          }}
-                          className="bento-input font-mono"
-                        />
-                      </Field>
-                    )}
-                  </div>
-
-                  <div className="mt-4 grid gap-4 md:grid-cols-[minmax(0,1fr)_auto]">
-                    <Field label="输出目录（可选）">
-                      <input
-                        type="text"
-                        value={outputDir}
-                        onChange={(e) => {
-                          setOutputDir(e.target.value);
-                          localStorage.setItem('output_dir', e.target.value);
-                        }}
-                        placeholder="D:\\clips\\project-a"
-                        className="bento-input font-mono"
-                      />
-                    </Field>
-                    <button
-                      type="button"
-                      onClick={handlePickOutputDir}
-                      disabled={selectingDir}
-                      className={`btn-secondary mt-[26px] rounded-2xl px-4 py-3 text-sm ${selectingDir ? 'opacity-60' : ''}`}
-                    >
-                      {selectingDir ? <Loader2 size={16} className="animate-spin" /> : <FolderOpen size={16} />}
-                      浏览
-                    </button>
-                  </div>
-                </div>
-
-                <div className="rounded-[24px] border border-white/8 bg-[#152b42] px-5 py-5">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-2xl bg-warm/10 text-warm">
-                      <Zap size={16} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold text-text-primary">极速模式</div>
-                      <div className="mt-1 text-sm text-text-secondary leading-6">
-                        使用更轻量的排序逻辑与更少的精修步骤，加快处理速度。
-                      </div>
-                    </div>
-                    <Toggle
-                      checked={speedBoost}
-                      onChange={(checked) => {
-                        setSpeedBoost(checked);
-                        localStorage.setItem('speed_boost', checked ? '1' : '0');
+                  <div className="flex h-full flex-col items-center justify-center gap-4 py-10 text-center">
+                    <div
+                      className="flex h-14 w-14 items-center justify-center rounded-2xl transition-all duration-300"
+                      style={{
+                        background: file ? 'rgba(62, 196, 126, 0.08)' : 'var(--color-accent-dim)',
+                        border: `1px solid ${file ? 'rgba(62, 196, 126, 0.2)' : 'rgba(124, 109, 238, 0.15)'}`,
                       }}
-                    />
+                    >
+                      {file
+                        ? <Film size={22} className="text-success" />
+                        : <Upload size={22} className="text-accent" />}
+                    </div>
+                    <div>
+                      <div className="text-base font-semibold text-text-primary">
+                        {file ? file.name : '将视频拖拽到这里'}
+                      </div>
+                      <div className="mt-1.5 text-sm text-text-secondary">
+                        {file ? '已就绪 — 点击可替换文件' : '或点击选择 MP4 / MKV / AVI'}
+                      </div>
+                    </div>
+                    {uploading && (
+                      <div className="w-full max-w-xs">
+                        <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+                          <div className="progress-shimmer h-full rounded-full transition-[width] duration-300" style={{ width: `${uploadProgress * 100}%` }} />
+                        </div>
+                        <div className="mt-2 font-mono text-xs text-text-muted">上传中 {Math.round(uploadProgress * 100)}%</div>
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                <div className="rounded-[24px] border border-white/8 bg-[#102338] p-5 xl:mt-auto">
-                  <div className="text-sm text-text-muted leading-6">
-                    {activeTab === 'live'
-                      ? '直播模式会先录制，再自动进入同一套高光提取流程。'
-                      : '任务完成后，生成片段会直接进入复核工作区。'}
-                  </div>
-                  <button
-                    onClick={handleStart}
-                    disabled={!canStart || uploading || submitting}
-                    className="btn-warm mt-5 w-full rounded-full px-6 py-3 text-sm"
+              ) : (
+                <div className="min-h-[520px] rounded-2xl border border-[var(--color-border)] bg-black/20 p-5">
+                  <div
+                    className="rounded-xl p-4 transition-all duration-200"
+                    style={{
+                      background: urlFocused ? 'rgba(124, 109, 238, 0.03)' : 'rgba(0, 0, 0, 0.25)',
+                      border: `1px solid ${urlFocused ? 'rgba(124, 109, 238, 0.25)' : 'var(--color-border)'}`,
+                    }}
                   >
-                    {uploading || submitting ? '处理中...' : '生成高光片段'}
-                    <ArrowRight size={16} />
+                    <div className="signal-label mb-3">{activeTab === 'live' ? '直播来源' : '视频来源'}</div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="text" value={url}
+                        onFocus={() => setUrlFocused(true)} onBlur={() => setUrlFocused(false)}
+                        onChange={(e) => { setUrl(e.target.value); setError(''); }}
+                        placeholder={activeTab === 'live' ? '粘贴直播链接（B站 / 抖音 / 油管 等）' : '粘贴视频链接（B站 / 油管 / 抖音 / 西瓜 / 微博 / 小红书）'}
+                        className="flex-1 bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted font-mono"
+                        style={{ caretColor: 'var(--color-accent)' }}
+                      />
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-[var(--color-border)] bg-black/20">
+                        {urlStatus === 'loading' && <Loader2 size={13} className="animate-spin text-text-muted" />}
+                        {urlStatus === 'valid' && <CheckCircle2 size={13} className="text-success" />}
+                        {urlStatus === 'invalid' && <AlertTriangle size={13} className="text-danger" />}
+                      </div>
+                    </div>
+                  </div>
+                  {urlPreview && (
+                    <div className="mt-3 rounded-xl border border-[var(--color-border)] bg-black/25 p-4">
+                      <div className="text-sm font-semibold text-text-primary">{urlPreview.title}</div>
+                      <div className="mt-1 text-sm text-text-secondary">{urlPreview.subtitle}</div>
+                      {urlPreview.meta && <div className="mt-2 font-mono text-xs text-text-muted">{urlPreview.meta}</div>}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {error && (
+                <div className="rounded-xl border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger">
+                  {error}
+                </div>
+              )}
+            </div>
+
+            {/* Right: Params */}
+            <div className="flex flex-col gap-4">
+
+              {/* Params card */}
+              <div className="rounded-2xl border border-[var(--color-border)] bg-black/25 p-5">
+                <div className="mb-5 section-eyebrow">参数配置</div>
+                <div className={`grid gap-4 ${activeTab === 'live' ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+                  <Field label="片段数" hint={PARAM_HINT}>
+                    <input type="number" min={1} max={50} value={topN}
+                      onChange={(e) => { setTopN(e.target.value); localStorage.setItem('top_n', e.target.value); }}
+                      className="bento-input font-mono" />
+                  </Field>
+                  <Field label="片段时长（秒）" hint={PARAM_HINT}>
+                    <input type="number" min={5} max={3600} value={clipDuration}
+                      onChange={(e) => { setClipDuration(e.target.value); localStorage.setItem('clip_duration', e.target.value); }}
+                      className="bento-input font-mono" />
+                  </Field>
+                  {activeTab === 'live' && (
+                    <Field label="录制时长（秒）">
+                      <input type="number" min={30} max={43200} value={liveDuration}
+                        onChange={(e) => { setLiveDuration(e.target.value); localStorage.setItem('live_duration', e.target.value); }}
+                        className="bento-input font-mono" />
+                    </Field>
+                  )}
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
+                  <Field label="输出目录（可选）">
+                    <input type="text" value={outputDir}
+                      onChange={(e) => { setOutputDir(e.target.value); localStorage.setItem('output_dir', e.target.value); }}
+                      placeholder="D:\clips\project-a" className="bento-input font-mono" />
+                  </Field>
+                  <button type="button" onClick={handlePickOutputDir} disabled={selectingDir}
+                    className={`btn-secondary mt-[26px] rounded-xl px-4 py-3 text-sm ${selectingDir ? 'opacity-60' : ''}`}>
+                    {selectingDir ? <Loader2 size={15} className="animate-spin" /> : <FolderOpen size={15} />}
+                    浏览
                   </button>
                 </div>
               </div>
+
+              {/* Speed boost */}
+              <div className="rounded-2xl border border-[var(--color-border)] bg-black/20 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-warm-dim"
+                    style={{ border: '1px solid rgba(212, 151, 90, 0.12)' }}>
+                    <Zap size={15} className="text-warm" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-bold text-text-primary">极速模式</div>
+                    <div className="mt-0.5 text-xs leading-5 text-text-secondary">轻量排序逻辑，减少精修步骤</div>
+                  </div>
+                  <Toggle checked={speedBoost} onChange={(checked) => { setSpeedBoost(checked); localStorage.setItem('speed_boost', checked ? '1' : '0'); }} />
+                </div>
+              </div>
+
+              {/* CTA */}
+              <div className="rounded-2xl border border-[var(--color-border)] bg-black/25 p-5">
+                <div className="mb-4 flex items-center gap-2 text-xs text-text-muted">
+                  <div
+                    className="h-1.5 w-1.5 rounded-full transition-all duration-300"
+                    style={{
+                      background: canStart && !uploading && !submitting ? 'var(--color-warm)' : 'var(--color-text-muted)',
+                    }}
+                  />
+                  {activeTab === 'live' ? '直播模式：先录制，再自动运行高光提取。' : '任务完成后片段直接进入复核工作区。'}
+                </div>
+                <button onClick={handleStart} disabled={!canStart || uploading || submitting}
+                  className="btn-warm w-full rounded-xl px-6 py-3.5 text-sm">
+                  {uploading || submitting ? '处理中...' : '生成高光片段'}
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+
             </div>
+          </div>
         </section>
+
       </div>
     </div>
   );
@@ -501,7 +459,7 @@ export default function ImportPanel() {
 function Field({ label, hint, children }) {
   return (
     <div>
-      <label className="mb-2 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted">
+      <label className="mb-2 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-muted">
         {label}
         {hint ? <HintIcon text={hint} /> : null}
       </label>
@@ -514,7 +472,7 @@ function HintIcon({ text }) {
   return (
     <span className="group relative inline-flex items-center">
       <CircleHelp size={12} className="text-text-muted" />
-      <span className="pointer-events-none absolute bottom-[130%] left-1/2 z-20 w-48 -translate-x-1/2 rounded-xl border border-white/8 bg-[#1a314a] px-2.5 py-2 text-[10px] leading-4 text-text-secondary opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
+      <span className="pointer-events-none absolute bottom-[130%] left-1/2 z-20 w-48 -translate-x-1/2 rounded-xl border border-[var(--color-border)] bg-panel-strong px-2.5 py-2 text-[10px] leading-4 text-text-secondary opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
         {text}
       </span>
     </span>
@@ -523,17 +481,22 @@ function HintIcon({ text }) {
 
 function ImportIllustration() {
   return (
-    <svg viewBox="0 0 320 200" className="h-auto w-full text-[#7faed2]" fill="none" aria-hidden>
-      <rect x="18" y="22" width="284" height="156" rx="28" fill="#10253a" stroke="#28425e" />
-      <rect x="42" y="46" width="236" height="108" rx="20" fill="#163049" stroke="#28425e" />
-      <rect x="68" y="76" width="88" height="48" rx="18" fill="#7faed2" opacity="0.18" />
-      <rect x="170" y="76" width="66" height="12" rx="6" fill="#c7d9ea" />
-      <rect x="170" y="96" width="84" height="10" rx="5" fill="#d7e5f2" />
-      <rect x="170" y="115" width="54" height="10" rx="5" fill="#edd8bc" />
-      <path d="M110 62v44" stroke="#7faed2" strokeWidth="8" strokeLinecap="round" />
-      <path d="M92 80l18-18 18 18" stroke="#7faed2" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="272" cy="46" r="18" fill="#f5eadb" />
-      <circle cx="50" cy="158" r="10" fill="#e6f0f8" />
+    <svg viewBox="0 0 240 180" className="h-auto w-full opacity-60" fill="none" aria-hidden>
+      {/* Minimal abstract waveform */}
+      <rect x="16" y="20" width="208" height="140" rx="16" fill="rgba(124,109,238,0.04)" stroke="rgba(124,109,238,0.1)" strokeWidth="1" />
+      {[0,1,2,3,4,5,6,7,8,9].map((i) => {
+        const heights = [20,35,25,48,38,55,30,42,22,50];
+        const h = heights[i];
+        const x = 32 + i * 20;
+        const y = 90 - h / 2;
+        return (
+          <rect key={i} x={x} y={y} width="10" height={h} rx="3"
+            fill={i === 5 || i === 4 ? 'rgba(124,109,238,0.5)' : 'rgba(124,109,238,0.15)'}
+          />
+        );
+      })}
+      <path d="M186 72v28" stroke="rgba(124,109,238,0.4)" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M176 82l10-10 10 10" stroke="rgba(124,109,238,0.4)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

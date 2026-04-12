@@ -131,10 +131,8 @@ export default function ProcessingView() {
         <section className="surface-panel p-5 md:p-6">
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-muted">
-                处理中
-              </div>
-              <h1 className="text-4xl font-extrabold tracking-[-0.05em] text-text-primary md:text-5xl">
+              <div className="mb-2 signal-label">处理中</div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-text-primary md:text-4xl">
                 {statusTitle}
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-text-secondary">{statusText}</p>
@@ -150,9 +148,9 @@ export default function ProcessingView() {
               <span>流程进度</span>
               <span className="font-mono">{percent}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-[#20364f]">
+            <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
               <div
-                className="h-full rounded-full bg-[linear-gradient(90deg,#7faed2_0%,#d2a163_100%)] transition-all duration-700"
+                className="progress-shimmer h-full rounded-full transition-[width] duration-700"
                 style={{ width: `${Math.max(4, percent)}%` }}
               />
             </div>
@@ -165,14 +163,20 @@ export default function ProcessingView() {
               const isDone = isPipelineDone || currentStageIdx > index || state.jobStatus === 'completed';
 
               return (
-                <div key={stage} className="rounded-[20px] border border-white/8 bg-[#12283e] p-4">
+                <div key={stage} className={`rounded-xl border p-4 transition-all duration-300 ${
+                  isActive
+                    ? 'card-active-accent bg-accent/5'
+                    : isDone
+                      ? 'border-success/15 bg-success/3'
+                      : 'border-[var(--color-border)] bg-panel-strong'
+                }`}>
                   <div className="mb-3 flex items-center justify-between gap-3">
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-2xl ${
-                      isDone ? 'bg-success/10 text-success' : isActive ? 'bg-accent/12 text-accent' : 'bg-[#163049] text-text-muted'
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 ${
+                      isDone ? 'bg-success/10 text-success' : isActive ? 'bg-accent/10 text-accent pulse-ring' : 'bg-white/5 text-text-muted'
                     }`}>
-                      {isDone ? <CheckCircle2 size={17} /> : isActive ? <Loader size={17} className="animate-spin" /> : <span className="text-sm font-bold">{index + 1}</span>}
+                      {isDone ? <CheckCircle2 size={15} /> : isActive ? <Loader size={15} className="animate-spin" /> : <span className="text-xs font-bold">{index + 1}</span>}
                     </div>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-muted">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
                       {isDone ? '完成' : isActive ? '进行中' : '等待中'}
                     </span>
                   </div>
@@ -184,7 +188,7 @@ export default function ProcessingView() {
           </div>
 
           {(completedResult || state.jobStatus === 'failed') && (
-            <div className="mt-6 rounded-[22px] border border-white/8 bg-[#12283e] p-4">
+            <div className="mt-6 rounded-xl border border-[var(--color-border)] bg-panel-strong p-4">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
                   <div className="text-sm font-semibold text-text-primary">
@@ -204,7 +208,7 @@ export default function ProcessingView() {
                         duration: completedResult.duration || 0,
                       },
                     })}
-                    className="btn-warm rounded-full px-5 py-3 text-sm"
+                    className="btn-warm rounded-xl px-5 py-3 text-sm"
                   >
                     继续到复核
                     <ArrowRight size={15} />
@@ -212,7 +216,7 @@ export default function ProcessingView() {
                 ) : (
                   <button
                     onClick={() => dispatch({ type: 'RESET' })}
-                    className="btn-secondary rounded-full px-5 py-3 text-sm"
+                    className="btn-secondary rounded-xl px-5 py-3 text-sm"
                   >
                     <RefreshCcw size={15} />
                     重新开始
@@ -229,7 +233,7 @@ export default function ProcessingView() {
               <div className="mb-3 text-sm font-semibold text-text-primary">已生成片段</div>
               <div className="space-y-2">
                 {completedResult.highlights?.slice(0, 6).map((clip, idx) => (
-                  <div key={clip.id || `clip-${idx}`} className="rounded-[18px] border border-white/8 bg-[#152b42] px-4 py-3">
+                  <div key={clip.id || `clip-${idx}`} className="rounded-xl border border-[var(--color-border)] bg-panel-strong px-4 py-3">
                     <div className="flex items-center justify-between gap-3">
                       <div className="text-sm font-semibold text-text-primary">
                         片段 {String(idx + 1).padStart(2, '0')}
@@ -246,15 +250,15 @@ export default function ProcessingView() {
 
           <section className="surface-panel p-5">
             <div className="mb-3 flex items-center gap-2 text-text-primary">
-              <AlertCircle size={16} />
+              <AlertCircle size={15} />
               <span className="text-sm font-semibold">执行日志</span>
             </div>
             {latestErrorText && (
-              <div className="mb-3 rounded-[18px] border border-danger/25 bg-danger/6 px-4 py-3 text-sm text-danger whitespace-pre-wrap">
+              <div className="mb-3 rounded-xl border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger whitespace-pre-wrap">
                 {latestErrorText}
               </div>
             )}
-            <div className="max-h-[420px] space-y-2 overflow-y-auto rounded-[18px] border border-white/8 bg-[#12283e] p-4 font-mono text-xs text-text-secondary">
+            <div className="max-h-[420px] space-y-2 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-black/25 p-4 font-mono text-xs text-text-secondary">
               {logs.length === 0 && <div className="text-text-muted">暂无日志记录。</div>}
               {logs.map((log, idx) => {
                 const level = String(log?.level || 'info').toLowerCase();
@@ -276,7 +280,7 @@ export default function ProcessingView() {
           {!completedResult && (
             <section className="surface-panel p-5">
               <div className="mb-2 flex items-center gap-2 text-text-primary">
-                <Clock size={15} />
+                <Clock size={14} />
                 <span className="text-sm font-semibold">当前步骤</span>
               </div>
               <div className="text-sm text-text-secondary">
@@ -292,8 +296,8 @@ export default function ProcessingView() {
 
 function MetaChip({ label, value }) {
   return (
-    <div className="rounded-full border border-white/8 bg-[#1a2c41] px-3 py-1.5">
-      <span className="text-[10px] font-semibold uppercase tracking-[0.13em] text-text-muted">{label}</span>
+    <div className="rounded-lg border border-[var(--color-border)] bg-panel-strong px-3 py-1.5">
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">{label}</span>
       <span className="ml-2 text-xs font-mono text-text-primary">{value}</span>
     </div>
   );

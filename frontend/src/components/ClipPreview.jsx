@@ -64,8 +64,8 @@ export default function ClipPreview() {
   if (!selectedClip) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-text-muted">
-        <Play size={40} strokeWidth={1.2} />
-        <p className="text-xs font-semibold uppercase tracking-[0.16em]">请选择一个片段进行复核</p>
+        <Play size={36} strokeWidth={1.2} />
+        <p className="text-xs font-medium">请选择一个片段进行复核</p>
       </div>
     );
   }
@@ -74,10 +74,10 @@ export default function ClipPreview() {
 
   return (
     <div className="flex h-full w-full flex-col gap-4">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-text-muted">预览</div>
-          <div className="mt-1 text-2xl font-extrabold tracking-[-0.04em] text-text-primary">
+          <div className="signal-label">预览</div>
+          <div className="mt-1 text-xl font-bold tracking-tight text-text-primary">
             {formatTime(selectedClip.clipStart)} - {formatTime(selectedClip.clipEnd)}
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function ClipPreview() {
           {selectedClip.contentHook && <Badge label="钩子" value="是" tone="warm" />}
           <button
             onClick={() => dispatch({ type: 'TOGGLE_CLIP', payload: selectedClip.id })}
-            className="btn-secondary rounded-full px-4 py-2.5 text-sm"
+            className="btn-secondary rounded-lg px-3.5 py-2 text-sm"
           >
             {selectedClip.selected ? <Check size={14} /> : <Square size={14} />}
             {selectedClip.selected ? '已选择' : '选择'}
@@ -94,7 +94,7 @@ export default function ClipPreview() {
         </div>
       </div>
 
-      <div className="relative min-h-[320px] flex-1 overflow-hidden rounded-[22px] border border-white/8 bg-[#12263c]">
+      <div className="relative min-h-[320px] flex-1 overflow-hidden rounded-xl border border-[var(--color-border)] bg-black/40">
         {clipUrl && (
           <video
             key={clipUrl}
@@ -111,24 +111,24 @@ export default function ClipPreview() {
         )}
       </div>
 
-      <div className="rounded-[22px] border border-white/8 bg-[#12283e] p-4">
+      <div className="rounded-xl border border-[var(--color-border)] bg-panel-strong p-4">
         {(selectedClip.contentTags?.length > 0 || selectedClip.topKeywords?.length > 0) && (
-          <div className="mb-3 flex flex-wrap gap-2">
+          <div className="mb-3 flex flex-wrap gap-1.5">
             {(selectedClip.contentTags?.length ? selectedClip.contentTags : selectedClip.topKeywords || []).slice(0, 4).map((tag) => (
-              <span key={tag} className="rounded-full border border-white/8 bg-[#1a314a] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
+              <span key={tag} className="rounded-md border border-[var(--color-border)] bg-black/20 px-2 py-0.5 text-[10px] font-medium text-text-secondary">
                 {tag}
               </span>
             ))}
           </div>
         )}
         {selectedClip.contentSummary && (
-          <p className="mb-4 text-sm leading-7 text-text-secondary">
+          <p className="mb-4 text-sm leading-6 text-text-secondary">
             {selectedClip.contentSummary}
           </p>
         )}
 
         <div
-          className="h-2 cursor-pointer overflow-hidden rounded-full bg-[#20364f]"
+          className="h-1.5 cursor-pointer overflow-hidden rounded-full bg-white/5"
           onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
             if (!videoRef.current || duration <= 0) return;
@@ -136,35 +136,36 @@ export default function ClipPreview() {
           }}
         >
           <div
-            className="h-full rounded-full bg-[linear-gradient(90deg,#7faed2_0%,#d2a163_100%)] transition-all duration-200"
-            style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+            className="h-full rounded-full transition-all duration-200"
+            style={{
+              width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
+              background: 'linear-gradient(90deg, var(--color-accent), var(--color-warm))',
+            }}
           />
         </div>
 
-        <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-2">
             <button
               onClick={togglePlay}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white"
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-white transition-all hover:bg-accent-hover"
             >
-              {playing ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" className="ml-0.5" />}
+              {playing ? <Pause size={15} fill="currentColor" /> : <Play size={15} fill="currentColor" className="ml-0.5" />}
             </button>
             <button
               onClick={() => setMuted(!muted)}
-              className="btn-secondary rounded-full px-3 py-2 text-xs"
+              className="btn-secondary rounded-lg px-3 py-2 text-xs"
             >
-              {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-              {muted ? '静音' : '声音'}
+              {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
             </button>
             <button
               onClick={() => videoRef.current?.requestFullscreen()}
-              className="btn-secondary rounded-full px-3 py-2 text-xs"
+              className="btn-secondary rounded-lg px-3 py-2 text-xs"
             >
-              <Maximize2 size={14} />
-              全屏
+              <Maximize2 size={13} />
             </button>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             {FEEDBACK_OPTIONS.map((opt) => {
               const active = selectedClip.feedback === opt.key;
               const key = `${selectedClip.id}:${opt.key}`;
@@ -173,20 +174,20 @@ export default function ClipPreview() {
                   key={opt.key}
                   onClick={() => submitFeedback(selectedClip.id, opt.key, selectedClip.feedback)}
                   disabled={submittingKey === key}
-                  className={`rounded-full border px-3 py-2 text-xs font-semibold ${
+                  className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all ${
                     active
-                      ? 'border-accent/45 bg-accent/10 text-accent'
-                      : 'border-white/8 bg-[#1a314a] text-text-secondary'
+                      ? 'border-accent/25 bg-accent/8 text-accent'
+                      : 'border-[var(--color-border)] bg-black/20 text-text-secondary hover:text-text-primary'
                   }`}
                 >
                   <span className="inline-flex items-center gap-1.5">
-                    <opt.icon size={13} />
+                    <opt.icon size={12} />
                     {opt.label}
                   </span>
                 </button>
               );
             })}
-            <span className="rounded-full border border-white/8 bg-[#1a314a] px-3 py-2 text-xs font-mono text-text-secondary">
+            <span className="rounded-lg border border-[var(--color-border)] bg-black/20 px-2.5 py-1.5 text-xs font-mono text-text-muted">
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>
           </div>
@@ -198,13 +199,13 @@ export default function ClipPreview() {
 
 function Badge({ label, value, tone = 'accent' }) {
   const toneClass = tone === 'warm'
-    ? 'border-warm/25 bg-warm/10 text-warm'
-    : 'border-accent/25 bg-accent/10 text-accent';
+    ? 'border-warm/15 bg-warm/6 text-warm'
+    : 'border-accent/15 bg-accent/6 text-accent';
 
   return (
-    <div className={`rounded-full border px-3 py-2 ${toneClass}`}>
-      <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-current/70">{label}</span>
-      <span className="ml-2 text-xs font-bold text-current">{value}</span>
+    <div className={`rounded-lg border px-2.5 py-1.5 ${toneClass}`}>
+      <span className="text-[10px] font-medium text-current/60">{label}</span>
+      <span className="ml-1.5 text-xs font-bold text-current">{value}</span>
     </div>
   );
 }

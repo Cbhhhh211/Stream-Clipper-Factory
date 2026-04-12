@@ -66,7 +66,6 @@ export default function ExportPanel() {
     for (let i = 0; i < selectedClips.length; i += 1) {
       const clip = selectedClips[i];
       try {
-        // Sequential download keeps browser/WebView behavior stable.
         // eslint-disable-next-line no-await-in-loop
         await downloadSingleClip(clip, i);
       } catch (err) {
@@ -125,28 +124,21 @@ export default function ExportPanel() {
   };
 
   return (
-    <div className="min-h-full w-full overflow-y-auto p-4 md:p-8">
-      <div className="mx-auto flex w-full max-w-[1380px] flex-col gap-5">
-        <section className="surface-panel overflow-hidden px-5 py-5 md:px-8 md:py-7">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_320px] xl:items-center">
-            <div>
-              <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-text-muted">
-                导出
-              </div>
-              <h1 className="max-w-2xl text-4xl font-extrabold tracking-[-0.05em] text-text-primary md:text-5xl">
-                打包你保留的片段，并一键导出。
-              </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-text-secondary">
-                这里的目标很明确：确认目标格式、下载已选片段，并可在导出后清理源素材。
-              </p>
-            </div>
-            <div className="rounded-[26px] border border-white/8 bg-[#12263c] p-5">
-              <ExportIllustration />
-            </div>
+    <div className="min-h-full w-full overflow-y-auto p-4 md:p-6">
+      <div className="mx-auto flex w-full max-w-[1380px] flex-col gap-4">
+        <section className="surface-panel overflow-hidden px-5 py-5 md:px-7 md:py-6">
+          <div>
+            <div className="mb-2 signal-label">导出</div>
+            <h1 className="max-w-2xl text-3xl font-extrabold tracking-tight text-text-primary md:text-4xl">
+              打包你保留的片段，并一键导出。
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-text-secondary">
+              确认目标格式、下载已选片段，并可在导出后清理源素材。
+            </p>
           </div>
         </section>
 
-        <div className="grid gap-5">
+        <div className="grid gap-4">
           <section className="surface-panel p-5 md:p-6">
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap gap-2">
@@ -156,7 +148,7 @@ export default function ExportPanel() {
               </div>
               <button
                 onClick={() => dispatch({ type: 'SET_PHASE', payload: 'review' })}
-                className="btn-secondary rounded-full px-4 py-2.5 text-xs uppercase tracking-[0.12em]"
+                className="btn-secondary rounded-lg px-4 py-2 text-xs font-semibold"
               >
                 <ArrowLeft size={14} />
                 返回复核
@@ -164,10 +156,10 @@ export default function ExportPanel() {
             </div>
 
             <div className="grid gap-5 xl:grid-cols-2 xl:items-start">
-              <div className="space-y-5">
-                <div className="rounded-[24px] border border-white/8 bg-[#12283e] p-5">
-                  <div className="section-eyebrow mb-5">平台</div>
-                  <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-4">
+                <div className="rounded-xl border border-[var(--color-border)] bg-panel-strong p-5">
+                  <div className="section-eyebrow mb-4">平台</div>
+                  <div className="grid gap-2.5 sm:grid-cols-2">
                     {PLATFORMS.map((p) => (
                       <button
                         key={p.id}
@@ -175,15 +167,15 @@ export default function ExportPanel() {
                           setSelectedPlatform(p.id);
                           setAspect(p.aspect);
                         }}
-                        className={`rounded-[20px] border px-4 py-4 text-left transition-colors ${
+                        className={`rounded-xl border px-4 py-3.5 text-left transition-all duration-200 ${
                           selectedPlatform === p.id
-                            ? 'border-accent/45 bg-[#1b3047]'
-                            : 'border-white/8 bg-[#152b42] hover:bg-[#1a324d]'
+                            ? 'card-active-accent bg-accent/4'
+                            : 'border-[var(--color-border)] bg-black/15 hover:bg-bg-hover hover:border-[var(--color-border-active)]'
                         }`}
                       >
                         <div className="text-sm font-semibold text-text-primary">{p.name}</div>
                         <div className="mt-1 text-sm text-text-secondary">{p.desc}</div>
-                        <div className="mt-3 text-xs font-mono text-text-muted">
+                        <div className="mt-2 text-xs font-mono text-text-muted">
                           {p.maxDuration ? `最长 ${p.maxDuration}秒` : '无固定时长限制'}
                         </div>
                       </button>
@@ -191,20 +183,20 @@ export default function ExportPanel() {
                   </div>
                 </div>
 
-                <div className="rounded-[24px] border border-white/8 bg-[#12283e] p-5">
-                  <div className="section-eyebrow mb-5">画面比例</div>
-                  <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-xl border border-[var(--color-border)] bg-panel-strong p-5">
+                  <div className="section-eyebrow mb-4">画面比例</div>
+                  <div className="grid gap-2.5 sm:grid-cols-3">
                     {ASPECT_OPTIONS.map((opt) => (
                       <button
                         key={opt.id}
                         onClick={() => setAspect(opt.id)}
-                        className={`inline-flex items-center justify-center gap-2 rounded-[18px] border px-4 py-3 text-sm font-semibold transition-colors ${
+                        className={`inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition-colors ${
                           aspect === opt.id
-                            ? 'border-accent/45 bg-[#1b3047] text-text-primary'
-                            : 'border-white/8 bg-[#152b42] text-text-secondary hover:bg-[#1a324d]'
+                            ? 'border-accent/25 bg-accent/5 text-text-primary'
+                            : 'border-[var(--color-border)] bg-black/15 text-text-secondary hover:bg-bg-hover'
                         }`}
                       >
-                        <opt.icon size={16} />
+                        <opt.icon size={15} />
                         {opt.label}
                       </button>
                     ))}
@@ -212,17 +204,17 @@ export default function ExportPanel() {
                 </div>
               </div>
 
-              <aside className="flex flex-col gap-5">
-                <div className="rounded-[24px] border border-white/8 bg-[#12263c] p-5">
+              <aside className="flex flex-col gap-4">
+                <div className="rounded-xl border border-[var(--color-border)] bg-panel-strong p-5">
                   <div className="mb-3 text-sm font-semibold text-text-primary">已选片段</div>
                   {selectedClips.length === 0 ? (
                     <div className="text-sm leading-6 text-text-muted">尚未选择片段。请回到复核页保留要导出的内容。</div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {selectedClips.map((clip, idx) => {
                         const scorePercent = Math.round((clip.score || 0) * 100);
                         return (
-                          <div key={clip.id} className="rounded-[18px] border border-white/8 bg-[#152b42] px-4 py-3">
+                          <div key={clip.id} className="rounded-lg border border-[var(--color-border)] bg-black/20 px-3.5 py-2.5">
                             <div className="flex items-center justify-between gap-3">
                               <div className="text-sm font-semibold text-text-primary">
                                 片段 {String(idx + 1).padStart(2, '0')}
@@ -239,21 +231,21 @@ export default function ExportPanel() {
                   )}
                 </div>
 
-                <div className="rounded-[24px] border border-white/8 bg-[#152b42] p-5">
+                <div className="rounded-xl border border-[var(--color-border)] bg-panel-strong p-5">
                   <div className="text-sm font-semibold text-text-primary">检查项</div>
-                  <div className="mt-3 space-y-2">
+                  <div className="mt-3 space-y-1.5">
                     <ChecklistItem done={selectedClips.length > 0} text="至少选择了一个片段" />
                     <ChecklistItem done={Boolean(platform)} text="已选择平台" />
                     <ChecklistItem done={Boolean(aspect)} text="已设置画面比例" />
                   </div>
                 </div>
 
-                <div className="rounded-[24px] border border-white/8 bg-[#152b42] p-5">
+                <div className="rounded-xl border border-[var(--color-border)] bg-panel-strong p-5">
                   <div className="space-y-4">
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="flex items-start gap-3">
-                        <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-warm/10 text-warm">
-                          <Trash2 size={16} />
+                        <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-warm/8 text-warm">
+                          <Trash2 size={15} />
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-text-primary">自动清理源素材</div>
@@ -271,12 +263,12 @@ export default function ExportPanel() {
                       />
                     </div>
 
-                    <div className="h-px w-full bg-white/8" />
+                    <div className="h-px w-full bg-[var(--color-border)]" />
 
                     <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="flex items-start gap-3">
-                        <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-warm/10 text-warm">
-                          <Trash2 size={16} />
+                        <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-warm/8 text-warm">
+                          <Trash2 size={15} />
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-text-primary">仅保留已导出片段</div>
@@ -297,19 +289,19 @@ export default function ExportPanel() {
                 </div>
 
                 {exportError && (
-                  <div className="rounded-[18px] border border-danger/25 bg-danger/6 px-4 py-3 text-sm text-danger">
+                  <div className="rounded-xl border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger">
                     {exportError}
                   </div>
                 )}
 
                 {exported && (
-                  <div className="rounded-[24px] border border-success/25 bg-[#f5fbf8] px-5 py-5">
+                  <div className="rounded-xl border border-success/20 bg-success/5 px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-success/10 text-success">
-                        <CheckCircle2 size={20} />
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/10 text-success">
+                        <CheckCircle2 size={18} />
                       </div>
                       <div>
-                        <div className="text-base font-semibold text-text-primary">导出完成</div>
+                        <div className="text-sm font-semibold text-text-primary">导出完成</div>
                         <div className="text-sm text-text-secondary">你选择的片段已可下载。</div>
                       </div>
                     </div>
@@ -320,16 +312,16 @@ export default function ExportPanel() {
                 <button
                   onClick={handleExport}
                   disabled={exporting || selectedClips.length === 0}
-                  className="btn-warm w-full rounded-full px-6 py-3.5 text-sm xl:mt-auto"
+                  className="btn-warm w-full rounded-xl px-6 py-3.5 text-sm xl:mt-auto"
                 >
                   {exporting ? (
                     <>
-                      <Loader size={16} className="animate-spin" />
+                      <Loader size={15} className="animate-spin" />
                       导出中...
                     </>
                   ) : (
                     <>
-                      <Download size={16} />
+                      <Download size={15} />
                       导出 {selectedClips.length} 个片段
                     </>
                   )}
@@ -345,8 +337,8 @@ export default function ExportPanel() {
 
 function StatChip({ label, value }) {
   return (
-    <div className="rounded-full border border-white/8 bg-[#1a2c41] px-3 py-1.5">
-      <span className="text-[10px] font-semibold uppercase tracking-[0.13em] text-text-muted">{label}</span>
+    <div className="rounded-lg border border-[var(--color-border)] bg-panel-strong px-3 py-1.5">
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">{label}</span>
       <span className="ml-2 text-xs font-mono text-text-primary">{value}</span>
     </div>
   );
@@ -354,24 +346,10 @@ function StatChip({ label, value }) {
 
 function ChecklistItem({ done, text }) {
   return (
-    <div className="flex items-center gap-2 rounded-[16px] border border-white/8 bg-[#1a2c41] px-3 py-2 text-sm text-text-secondary">
-      <span className={`h-2.5 w-2.5 rounded-full ${done ? 'bg-success' : 'bg-[#c9d7e6]'}`} />
+    <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-black/15 px-3 py-2 text-sm text-text-secondary">
+      <span className={`h-2 w-2 rounded-full ${done ? 'bg-success' : 'bg-text-muted'}`} />
       {text}
     </div>
-  );
-}
-
-function ExportIllustration() {
-  return (
-    <svg viewBox="0 0 320 200" className="h-auto w-full" fill="none" aria-hidden>
-      <rect x="26" y="28" width="268" height="144" rx="26" fill="#10253a" stroke="#28425e" />
-      <rect x="54" y="52" width="212" height="96" rx="20" fill="#163049" stroke="#28425e" />
-      <rect x="82" y="80" width="156" height="40" rx="20" fill="#7faed2" opacity="0.18" />
-      <path d="M160 70v44" stroke="#7faed2" strokeWidth="8" strokeLinecap="round" />
-      <path d="M142 96l18 18 18-18" stroke="#7faed2" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="260" cy="54" r="16" fill="#f5eadb" />
-      <circle cx="68" cy="154" r="10" fill="#e6f0f8" />
-    </svg>
   );
 }
 

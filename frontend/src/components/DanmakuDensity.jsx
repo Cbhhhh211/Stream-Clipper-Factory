@@ -16,15 +16,15 @@ export default function DanmakuDensity() {
     <div className="flex h-full flex-col">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-text-muted">互动</div>
-          <h3 className="mt-1 text-lg font-semibold text-text-primary">弹幕密度</h3>
+          <div className="signal-label">互动</div>
+          <h3 className="mt-1 text-base font-semibold text-text-primary">弹幕密度</h3>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#163049] text-accent">
-          <MessageSquare size={16} />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/8 text-accent">
+          <MessageSquare size={15} />
         </div>
       </div>
 
-      <div className="flex min-h-[220px] flex-1 items-end gap-1 rounded-[20px] border border-white/8 bg-[#12283e] px-3 py-4">
+      <div className="flex min-h-[220px] flex-1 items-end gap-1 rounded-xl border border-[var(--color-border)] bg-black/20 px-3 py-4">
         {highlights.length === 0 ? (
           <div className="flex flex-1 items-center justify-center text-sm text-text-muted">暂无数据</div>
         ) : (
@@ -41,13 +41,13 @@ export default function DanmakuDensity() {
               >
                 <div
                   className={`w-full rounded-t-sm transition-opacity ${
-                    isSelected ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'
+                    isSelected ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'
                   }`}
                   style={{
                     height: `${densityH}%`,
                     background: isSelected
-                      ? 'linear-gradient(to top, rgba(210,161,99,0.9), rgba(127,174,210,0.65))'
-                      : 'linear-gradient(to top, rgba(127,174,210,0.7), rgba(127,174,210,0.16))',
+                      ? 'linear-gradient(to top, var(--color-warm), var(--color-accent))'
+                      : 'linear-gradient(to top, rgba(124,109,238,0.5), rgba(124,109,238,0.12))',
                   }}
                 />
                 {(i === 0 || i === highlights.length - 1 || i % Math.max(1, Math.floor(highlights.length / 5)) === 0) && (
